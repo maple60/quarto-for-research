@@ -1,9 +1,235 @@
 # 環境構築 {#sec-setup}
 
-<!-- TODO
-- Git のインストールと初期設定（`user.name` / `user.email`）
-- Quarto のインストール（Windows / macOS / Linux）
-- VS Code と Quarto 拡張機能
-- R / Python — 必要な人だけ、後回しでよい理由
-- 動作確認の手順と、よくある失敗
--->
+必要な道具を入れます。所要時間は30分ほどです。
+
+入れるのは3つ、設定するのは1つです。
+
+| 道具 | 役割 | 必須か |
+|---|---|---|
+| Git | 変更履歴を記録する | 必須 |
+| Quarto | 原稿を HTML に変換する | 必須 |
+| VS Code | 原稿を編集する | ほぼ必須 |
+| R / Python | 原稿の中でコードを実行する | 後回しでよい |
+
+::: {.callout-note}
+## ターミナルを開く
+
+この章ではターミナル（文字だけでパソコンに命令する画面）を使います。
+
+- **Windows** — スタートメニューで「PowerShell」と入力して開く
+- **macOS** — `Command` + `Space` で「ターミナル」と入力して開く
+- **Linux** — `Ctrl` + `Alt` + `T`
+
+コマンドを打ち込んだあとは `Enter` を押します。以降、「実行する」と書いてあるのはこの操作です。
+:::
+
+## 1. Git を入れる
+
+### Windows
+
+[git-scm.com/downloads](https://git-scm.com/downloads) から Windows 版のインストーラをダウンロードし、実行します。
+
+インストール中に多くの選択肢が出ますが、**すべて既定のまま「Next」を押して構いません**。既定の設定は妥当に選ばれています。判断に迷って手を止めるより、進めてください。
+
+### macOS
+
+ターミナルで次を実行します。
+
+```bash
+git --version
+```
+
+バージョンが表示されれば、すでに入っています。入っていない場合は開発ツールのインストールを促す画面が出るので、指示に従ってください。
+
+### Linux
+
+Ubuntu / Debian 系なら次を実行します。
+
+```bash
+sudo apt update && sudo apt install git
+```
+
+### 確認
+
+ターミナルを**いったん閉じて開き直してから**、次を実行します。
+
+```bash
+git --version
+```
+
+`git version 2.51.0` のように表示されれば成功です。数字は違って構いません。
+
+閉じて開き直すのは、インストールした場所をターミナルに認識させるためです。この手順を飛ばすと「そんなコマンドはない」と言われます。以降のインストールでも同じです。
+
+## 2. Git の初期設定
+
+Git は、記録に「誰が変更したか」を残します。その名前とメールアドレスを最初に教えます。この設定をしないと、最初のコミットで失敗します。
+
+```bash
+git config --global user.name "<あなたの名前>"
+```
+
+```bash
+git config --global user.email "<あなたのメールアドレス>"
+```
+
+`<あなたの名前>` は本名でもハンドルネームでも構いません。ここに入れた名前とメールアドレスは、**公開リポジトリでは誰でも見られる状態になります**。メールアドレスを公開したくない場合は、GitHub が用意する専用のアドレスを使えます（参考リンクの「コミットメールアドレスの設定」を参照）。
+
+続けて、もう1つ設定します。
+
+```bash
+git config --global init.defaultBranch main
+```
+
+これは、新しくリポジトリを作ったときの最初のブランチ名を `main` にする設定です。GitHub 側の既定が `main` なので、揃えておかないと最初の `git push` で食い違います。ブランチが何かは @sec-branch-pr で扱います。
+
+設定できたか確認します。
+
+```bash
+git config --global --list
+```
+
+`user.name`、`user.email`、`init.defaultBranch` の3行が含まれていれば完了です。
+
+## 3. Quarto を入れる
+
+[quarto.org/docs/download](https://quarto.org/docs/download/) から、自分の OS 用のインストーラをダウンロードして実行します。Windows なら `.msi`、macOS なら `.pkg`、Linux なら `.deb` または `.tar.gz` です。
+
+こちらも、選択肢はすべて既定のままで構いません。
+
+ターミナルを閉じて開き直し、確認します。
+
+```bash
+quarto --version
+```
+
+`1.8.24` のようにバージョン番号が表示されれば成功です。
+
+## 4. VS Code と Quarto 拡張機能
+
+原稿を書くエディタを入れます。他のエディタでも書けますが、このガイドは VS Code を前提に説明します。
+
+[code.visualstudio.com](https://code.visualstudio.com/) からダウンロードして実行します。
+
+インストール後、VS Code を開き、左端の四角が4つ並んだアイコン（**Extensions**）をクリックします。検索欄に `Quarto` と入力し、Quarto 社が公開している **Quarto** 拡張機能を **Install** します。
+
+この拡張機能を入れると、次のことができるようになります。
+
+- `.qmd` の色分け表示と入力補完
+- `Ctrl` + `Shift` + `K`（macOS では `Command` + `Shift` + `K`）でのプレビュー
+- 原稿内のコードをその場で実行
+
+**日本語表示にしたい場合。** 同じ **Extensions** で `Japanese Language Pack` を検索して入れると、メニューが日本語になります。ただし、Web 上の解説記事はほぼ英語表示を前提に書かれているため、英語のままのほうが調べやすい面もあります。
+
+## 5. R / Python — 後回しでよい理由
+
+Quarto は原稿の中に書いた R や Python のコードを実行できますが、**この章では入れなくて構いません**。
+
+理由は2つあります。
+
+第1に、コードを含まない文書だけなら、R も Python も必要ありません。CV、研究室マニュアル、スライドは、Quarto と Git だけで作れます。
+
+第2に、コードを実行する段階になったとき、必要なものは目的によって変わります。R なら R 本体と RStudio、Python なら仮想環境の作り方まで含めて考える必要があり、それだけで独立した話題になります。第3部（@sec-code-execution）でまとめて扱います。
+
+いま入れておきたい場合は、次から入手できます。
+
+- R — [CRAN](https://cran.r-project.org/) から本体を入れ、[RStudio Desktop](https://posit.co/download/rstudio-desktop/) を追加する
+- Python — [python.org](https://www.python.org/downloads/) から入れ、`pip install jupyter` を実行する
+
+## 6. 動作確認
+
+3つの道具が揃ったか、まとめて確認します。ターミナルで順に実行してください。
+
+```bash
+git --version
+```
+
+```bash
+quarto --version
+```
+
+```bash
+quarto check
+```
+
+最後の `quarto check` は、Quarto 自身による自己診断です。実行すると、変換に必要な各機能について `[✓]` の並んだ一覧が出ます。
+
+R や Python を入れていない場合、それらの項目に警告が出ますが**問題ありません**。`Quarto` と `Pandoc` の項目に `[✓]` が付いていれば、文書の変換はできます。
+
+さらに、実際に1ページ変換してみます。作業用のフォルダを作り、その中で試します。
+
+```bash
+mkdir quarto-test
+```
+
+```bash
+cd quarto-test
+```
+
+VS Code でこのフォルダを開きます。
+
+```bash
+code .
+```
+
+`test.qmd` というファイルを作り、次の内容を書きます。
+
+```{.markdown filename="test.qmd"}
+---
+title: "動作確認"
+---
+
+## 見出し
+
+日本語が表示されるか確認します。
+```
+
+保存したら、ターミナルで実行します。
+
+```bash
+quarto preview test.qmd
+```
+
+ブラウザが開き、書いた内容が表示されれば環境構築は完了です。`Ctrl` + `C` でプレビューを終了できます。
+
+確認用のフォルダなので、あとで削除して構いません。
+
+これで @sec-quickstart に進む準備ができました。
+
+## よくある失敗
+
+**`git` や `quarto` が「コマンドが見つかりません」と言われる**
+
+ほとんどはターミナルを開き直していないことが原因です。すべてのターミナルウィンドウを閉じ、開き直してからもう一度試してください。VS Code の中のターミナルを使っている場合は、VS Code 自体を再起動する必要があります。
+
+それでも直らない場合は、インストーラを再実行してください。Windows では、インストール時に PATH（コマンドの探し場所）への追加が行われなかった可能性があります。
+
+**Windows で `sudo` や `ls` が動かない**
+
+このガイドのコマンドは、Windows では PowerShell を想定しています。`sudo` は Linux 用のコマンドで、Windows にはありません。Linux 向けと書かれた手順は読み飛ばしてください。
+
+**`git config` を実行しても何も表示されない**
+
+正常です。`git config` は設定を書き込むコマンドで、成功しても何も言いません。確認したい場合は `git config --global --list` を実行してください。
+
+**`quarto check` で R や Python に警告が出る**
+
+入れていなければ当然の結果です。この時点では問題ありません。第3部でコード実行を扱う段階になったら、あらためて確認します。
+
+**日本語が文字化けする**
+
+まず、ファイルの文字コードを確認してください。VS Code の画面右下に `UTF-8` と表示されていれば正常です。別のもの（`Shift JIS` など）になっている場合は、そこをクリックして **Save with Encoding** から `UTF-8` を選び直してください。
+
+`_quarto.yml` に `lang: ja` が書かれていない場合、目次などの UI が英語のままになります。これは文字化けとは別の問題です。
+
+**VS Code の Quarto 拡張機能が見つからない**
+
+検索結果に似た名前の拡張機能が複数出ます。発行元が **Quarto** になっているものを選んでください。
+
+## 参考リンク
+
+- [Quarto: Get Started](https://quarto.org/docs/get-started/) — 公式のインストール手順。OS ごとの詳細と、エディタ別の使い方がある
+- [Quarto: Download](https://quarto.org/docs/download/) — インストーラの配布ページ。過去のバージョンもここにある
+- [GitHub Docs: Git のセットアップ](https://docs.github.com/ja/get-started/git-basics/set-up-git) — インストールと初期設定の公式版。コミットメールアドレスの設定もここから辿れる
+- [Git 公式サイト: Downloads](https://git-scm.com/downloads) — Git インストーラの配布元
+- [Quarto: Using VS Code](https://quarto.org/docs/tools/vscode.html) — 拡張機能でできることの一覧。ショートカットキーの一覧もある
