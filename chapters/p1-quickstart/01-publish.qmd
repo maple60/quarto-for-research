@@ -229,3 +229,11 @@ git config --global user.email "<あなたのメールアドレス>"
 **リポジトリを Private で作ってしまった**
 
 **Settings** の一番下にある **Change repository visibility** から Public に変更できます。無料プランでは Private のままでは公開できません。
+
+## 参考リンク
+
+- [Quarto: Get Started](https://quarto.org/docs/get-started/) — インストールから最初のページまで。この章の内容の公式版
+- [Quarto: GitHub Pages](https://quarto.org/docs/publishing/github-pages.html) — 公開方法の公式解説。この章で使った Actions 方式のほか、別の方法も載っている
+- [GitHub Docs: GitHub でのアカウントの作成](https://docs.github.com/ja/get-started/start-your-journey/creating-an-account-on-github) — 手順1の詳細
+- [GitHub Docs: GitHub Pages](https://docs.github.com/ja/pages) — 公開機能そのものの説明。制限事項もここに書かれている
+- [quarto-actions](https://github.com/quarto-dev/quarto-actions) — 手順6で使ったワークフローの提供元。設定できる項目の一覧がある

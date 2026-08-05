@@ -83,3 +83,10 @@ on:
 **「リポジトリを Private にすればサイトも隠せる」**
 
 隠せません。無料プランでは、Private にすると GitHub Pages 自体が使えなくなります。有料プランで公開できたとしても、URL を知っている人は誰でも開けます。サイトに鍵をかけるには別の仕組みが必要で、それが第5部（@sec-why-private）の話です。
+
+## 参考リンク
+
+- [Quarto: Quarto Projects](https://quarto.org/docs/projects/quarto-projects.html) — `_quarto.yml` と出力先の考え方。「原稿と出来上がりは別物」の公式な説明
+- [Quarto: Publishing Basics](https://quarto.org/docs/publishing/) — 公開方法の一覧。GitHub Pages 以外の選択肢も分かる
+- [GitHub Docs: GitHub Actions](https://docs.github.com/ja/actions) — push が引き金になる仕組みの全体像
+- [GitHub Docs: GitHub について](https://docs.github.com/ja/get-started/using-git/about-git) — Git と GitHub の関係。次章（@sec-git-vs-github）の予習になる
