@@ -1,8 +1,202 @@
+---
+# この章はコードチャンクの書き方を「文字として」示すため、実行エンジンを止めている
+engine: markdown
+---
+
 # ソフトウェアドキュメント {#sec-tmpl-software-docs}
 
-<!-- TODO
-- 解析ツールの使い方を書く
-- コード例を実行しながら書く
-- バージョンごとのドキュメント
-- `examples/` の最小構成サンプル
--->
+研究室で書いた解析スクリプトや自作パッケージには、たいてい説明がありません。作った本人は覚えているので困らず、他の人は毎回本人に聞きます。
+
+ここで作るのは、その質問に先回りする文書です。対象は、研究室内で使い回している R / Python のコード、あるいは論文に添えて公開する解析ツールです。
+
+## README との役割分担
+
+まず、専用サイトが本当に必要かを判断してください。**多くの場合、README で足ります**（@sec-readme）。
+
+| | README | ドキュメントサイト |
+|---|---|---|
+| 分量 | 1画面〜数画面 | 制限なし |
+| 読まれる場所 | GitHub のリポジトリ画面 | 検索エンジン経由 |
+| コードの実行結果 | 手で貼る | 自動で埋め込める |
+| 向く規模 | 関数が数個、使う人が数人 | 関数が数十個、外部の利用者がいる |
+
+サイトを作るのは、次のどれかに当てはまるときです。
+
+- 使い方の説明が README に収まらなくなった
+- 実行結果の図を載せたいが、README では毎回貼り直しになる
+- 論文に URL を載せて、外部の人に使ってもらう
+
+当てはまらないなら README を厚くするほうが、維持できます。
+
+## 3種類の文書を分ける
+
+ドキュメントが読まれない原因の多くは、目的の違う文章が混ざっていることです。次の3つを別のページにしてください。
+
+**チュートリアル** — 初めての人が、最後まで通してやってみる文書。目的は「動いた」という体験です。分岐や例外は書かず、1本道にします。
+
+**使い方（How-to）** — 「〇〇したい」から引く文書。1ページ1課題です。`欠測値を除いて集計する`、`結果を CSV に書き出す` のような見出しにします。
+
+**リファレンス** — 関数と引数の一覧。網羅性が要求され、正確さがすべてです。
+
+この3分類は Diátaxis と呼ばれる考え方で、ソフトウェア文書の設計で広く使われています。研究用のツールでも、チュートリアル1本と使い方数ページがあれば、質問はかなり減ります。
+
+## 構成
+
+website 形式に、サイドバーを付けます。
+
+```
+mytool-docs/
+├── _quarto.yml
+├── index.qmd            # 概要とインストール
+├── tutorial.qmd         # 通しでやってみる
+├── howto/
+│   ├── missing-values.qmd
+│   └── export.qmd
+├── reference.qmd        # 関数一覧
+└── .github/workflows/publish.yml
+```
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: website
+  output-dir: _site
+
+lang: ja
+
+website:
+  title: "mytool"
+  site-url: "https://<あなたのユーザー名>.github.io/mytool-docs/"
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/<あなたのユーザー名>/mytool
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - index.qmd
+      - tutorial.qmd
+      - section: "使い方"
+        contents: howto/*.qmd
+      - reference.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-copy: true
+    code-overflow: wrap
+
+execute:
+  freeze: auto
+```
+
+`code-copy: true` は、コード例の右上にコピーボタンを出す設定です。読者が写し間違えなくなるので、この用途では必ず入れてください。
+
+## コード例を実行しながら書く
+
+ドキュメントのコード例が動かない、という事態はよく起きます。書いた時点では動いていたのに、その後の変更で引数名が変わった、といった理由です。
+
+Quarto では、**コード例を実際に実行して、その結果を埋め込めます**（@sec-code-execution）。動かないコードはビルドの時点で失敗するので、古い例が残りません。
+
+````{.markdown filename="tutorial.qmd"}
+```{r}
+#| echo: true
+library(mytool)
+
+d <- read_survey("data/sample.csv")
+summarize_by_group(d, group = "site")
+```
+````
+
+この書き方には副作用があります。ビルドのたびにコードが走るため、GitHub Actions 側にも R や Python の環境が必要になります。
+
+避けたいなら `freeze` を使ってください。手元で1回実行した結果が `_freeze/` に保存され、コードを変更しない限り再実行されません（@sec-github-actions）。`_freeze/` はコミットの対象です。
+
+計算に時間がかかる例では、実行しない書き方も選べます。
+
+````{.markdown filename="howto/export.qmd"}
+```{r}
+#| eval: false
+#| echo: true
+export_results(d, "out/summary.csv")
+```
+````
+
+`eval: false` は「表示するが実行しない」という指定です。ファイルを書き出す例や、外部サービスに接続する例で使います。ただし、実行されない例は古くなっても気づけません。使いどころは絞ってください。
+
+## インストール手順を書く
+
+ここでつまずかれると、その先を読んでもらえません。**そのまま貼り付けて動く形**で書いてください。
+
+````{.markdown filename="index.qmd"}
+```{.r}
+# GitHub から直接インストールする
+install.packages("remotes")
+remotes::install_github("<あなたのユーザー名>/mytool")
+```
+````
+
+必要な前提も明示します。R のバージョン、依存パッケージ、外部のコマンド。「適宜インストールしてください」で済ませないでください。
+
+動作を確認した環境（OS、R / Python のバージョン、確認した日付）を書いておくと、うまくいかない人が原因を切り分けられます。
+
+## バージョンごとの文書
+
+複数のバージョンの文書を並べて公開したくなりますが、**最初はやめてください。** 過去バージョンのサイトを維持する手間は、想像より大きくなります。
+
+現実的な運用はこうです。
+
+- **サイトは常に最新版だけ**を説明する
+- **変更履歴は GitHub の Releases に書く**（@sec-release）。「v0.3 で `group` 引数を `by` に改名」といった記述はここに残す
+- サイトの冒頭に、対象バージョンを1行書く
+
+利用者が過去のバージョンを使っている場合は、そのタグのリポジトリを見てもらえば README とソースがあります。文書サイトまで複製する必要はありません。
+
+## 最小構成から始める
+
+ソフトウェアドキュメントには、独立したテンプレートリポジトリを用意していません。言語（R / Python）や配布の方法で構成が変わりすぎ、雛形にする意味が薄いためです。
+
+代わりに、次の4ファイルから始めてください。
+
+```
+mytool-docs/
+├── _quarto.yml     # 上に載せたものをそのまま
+├── index.qmd       # 概要とインストール
+├── tutorial.qmd    # 通しでやってみる
+└── reference.qmd   # 関数一覧
+```
+
+`howto/` は、同じ質問を2回受けてから作れば十分です。先に枠だけ作ると、空のページが並びます。
+
+**R のパッケージを作っている場合は、pkgdown という専用の仕組みがあります。** 関数のヘルプから自動でリファレンスを生成できるため、リファレンス部分についてはそちらが優れています。チュートリアルや解説を Quarto で書き、リファレンスは pkgdown に任せる、という分担も可能です。
+
+## よくある失敗
+
+**ビルドは通るのにコード例が間違っている**
+
+`eval: false` を付けた例は実行されません。動作を保証したい例には付けないでください。
+
+**GitHub Actions でだけビルドが失敗する**
+
+手元にあるパッケージが、Actions の環境に入っていません。`freeze` を使って手元の実行結果を持ち込むか、ワークフローにインストール手順を足してください（@sec-github-actions）。
+
+**`_freeze/` を `.gitignore` に入れてしまった**
+
+`_freeze/` は追跡します。これがないと `freeze` の意味がなくなり、Actions 側で毎回コードが実行されます（@sec-gitignore）。
+
+**サンプルデータが見つからないと言われる**
+
+コード例が読み込むファイルは、リポジトリに入れてください。数 KB の小さな CSV を `data/` に置くのが定番です。大きなデータは置かず、生成するコードを載せてください（@sec-what-to-store）。
+
+**関数を追加したのにリファレンスに出ない**
+
+`reference.qmd` を手で書いている場合、自動では増えません。追加のたびに書く手間が負担なら、pkgdown のような自動生成の仕組みに移すことを検討してください。
+
+## 参考リンク
+
+- [Quarto: Code Cells](https://quarto.org/docs/computations/execution-options.html) — `echo`、`eval` などの実行オプション一覧
+- [Quarto: Project Code Execution](https://quarto.org/docs/projects/code-execution.html) — `freeze` の挙動と、プロジェクト全体での指定方法
+- [Quarto: Website Navigation](https://quarto.org/docs/websites/website-navigation.html) — サイドバーの構成方法
+- [Quarto: HTML Code Blocks](https://quarto.org/docs/output-formats/html-code.html) — コピーボタン、行番号、折り返しの設定
+- [pkgdown](https://pkgdown.r-lib.org/) — R パッケージのドキュメントサイトを自動生成する仕組み

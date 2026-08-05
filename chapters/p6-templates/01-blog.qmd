@@ -1,8 +1,194 @@
 # 研究ブログ {#sec-tmpl-blog}
 
-<!-- TODO
-- 何に使うか（進捗記録・文献メモ・研究広報）
-- `quarto-template-blog` の使い方
-- 最初に編集するファイル
-- 記事を追加する手順
--->
+ここからは、これまでの部品を組み合わせて実際のサイトを作ります。最初はブログです。
+
+研究のブログは、日記ではありません。**あとで自分が読み返す記録**であり、同じことで詰まった誰かに届く文書です。進捗、読んだ論文のメモ、環境構築でつまずいた点の解決策。書き捨てにせず1か所に溜めると、数年後の自分に効きます。
+
+## 形式を決める
+
+ブログは website 形式です。book では作れません。記事の一覧を自動生成する **listing** という仕組みが、book には用意されていないためです（@sec-website）。
+
+判断の分かれ目はここだけです。「記事が増え続け、新しいものを上に出したい」なら website + listing。「章の順序が決まっていて、頭から読ませたい」なら book です。
+
+## ファイルの構成
+
+記事は1つにつき1フォルダにします。
+
+```
+blog/
+├── _quarto.yml
+├── index.qmd          # 記事一覧
+├── about.qmd          # 自己紹介
+├── posts/
+│   ├── 2026-04-01-first-survey/
+│   │   ├── index.qmd
+│   │   └── site.jpg
+│   └── 2026-04-15-renv-memo/
+│       └── index.qmd
+└── .github/workflows/publish.yml
+```
+
+記事ごとにフォルダを切るのは、その記事で使う画像を隣に置けるからです。記事を消すときもフォルダごと消せます。フォルダ名を `2026-04-01-` で始めておくと、エクスプローラ上でも時系列に並びます。
+
+## `_quarto.yml`
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: website
+  output-dir: _site
+
+lang: ja
+
+website:
+  title: "研究ノート"
+  site-url: "https://<あなたのユーザー名>.github.io/blog/"
+  description: "野外調査と解析の記録"
+  navbar:
+    left:
+      - href: index.qmd
+        text: 記事
+      - href: about.qmd
+        text: このサイトについて
+    right:
+      - icon: github
+        href: https://github.com/<あなたのユーザー名>
+      - icon: rss
+        href: index.xml
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+execute:
+  freeze: auto
+```
+
+`<あなたのユーザー名>` の2か所と、リポジトリ名（例では `blog`）を自分のものに置き換えてください。それ以外はそのまま使えます。
+
+**`site-url` はブログでは必須です。** 他の形式では省略できますが、RSS は各記事の場所を完全な URL で書く必要があり、その組み立てにこの値が使われます。書き忘れると、RSS の中のリンクが壊れます。プロジェクトサイトでは末尾の `/<リポジトリ名>/` まで含めてください（@sec-github-pages）。
+
+## 一覧ページ
+
+`index.qmd` に `listing` を書きます。
+
+```{.markdown filename="index.qmd"}
+---
+title: "研究ノート"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  feed: true
+  fields: [date, title, description, categories]
+page-layout: full
+---
+```
+
+`feed: true` が RSS を作る指定です。これで `index.xml` が生成され、読者が更新を追えるようになります。`_quarto.yml` の navbar に置いた `icon: rss` のリンク先が、このファイルです。
+
+`type` は一覧の見た目で、`default`（1件ずつ縦に並ぶ）、`table`（表）、`grid`（カード状）から選べます。記事数が少ないうちは `default`、数十件を超えたら `table` が読みやすくなります。
+
+## 記事を1つ追加する
+
+手順は4つです。
+
+1. `posts/` の下にフォルダを作る（例: `2026-05-20-tidyverse-note/`）
+2. その中に `index.qmd` を作る
+3. YAML を書いて本文を書く
+4. コミットして push する
+
+記事側の YAML はこの形です。
+
+```{.markdown filename="posts/2026-05-20-tidyverse-note/index.qmd"}
+---
+title: "group_by の後の ungroup を忘れる"
+date: 2026-05-20
+categories: [R, 解析]
+description: "集計後の列が意図せず残る件と、その回避"
+image: thumbnail.png
+---
+
+## 何が起きたか
+
+...
+```
+
+`title` と `date` は必須です。これがないと一覧に出ません。`description` は一覧に表示される要約で、書いておくと読み手が開く前に判断できます。`image` を指定すると、一覧にサムネイルが出ます。
+
+push すれば @sec-github-actions のワークフローが走り、数分で公開されます。一覧ページを手で更新する必要はありません。
+
+## 書きかけを隠す
+
+途中まで書いた記事を手元に置いたまま push したいときは、記事の YAML に1行足します。
+
+```{.markdown filename="posts/2026-05-25-draft/index.qmd"}
+---
+title: "書きかけ"
+date: 2026-05-25
+draft: true
+---
+```
+
+`draft: true` の記事は、公開サイトの一覧に出ず、変換もされません。`quarto preview` では表示されるので、手元では書き進められます。仕上がったらこの行を消してください。
+
+## カテゴリの決め方
+
+`categories` は絞り込みに使われますが、増やしすぎると機能しません。**5〜8個に抑えて、記事ごとに1〜2個**を目安にしてください。
+
+研究用途では、次のような分け方が現実的です。
+
+| カテゴリの軸 | 例 |
+|---|---|
+| 作業の種類 | 調査, 解析, 執筆 |
+| 道具 | R, Python, Quarto |
+| 記録の種類 | 論文メモ, 覚え書き |
+
+途中で分類を変えたくなったら、各記事の `categories` を書き換えるだけです。一覧は次のビルドで作り直されます。
+
+## テンプレートから始める
+
+同じ構成を `quarto-template-blog` として配布しています。GitHub でそのリポジトリを開き、**Use this template** → **Create a new repository** を押すと、この章の内容が入った状態のリポジトリが自分のアカウントに作られます。
+
+`clone` ではなく **Use this template** を使ってください。clone は元リポジトリの履歴ごと複製するため、他人のコミットが自分の `git log` に混ざります。テンプレートからの作成なら、履歴のない新品のリポジトリになります。
+
+作ったあと最初に編集するのは、`_quarto.yml` の `title` / `site-url` / navbar の GitHub リンク、`about.qmd`、そして `posts/` の中のサンプル記事です。サンプルは消して構いません。
+
+## 続けるための工夫
+
+**1記事1テーマにする。** 「今週やったこと」をまとめて書くと、あとから検索で見つかりません。詰まった点と解決を1つずつ切り出してください。
+
+**その場で書く。** 解決した直後が最も詳しく書けます。1週間経つと、何が問題だったかを思い出せません。
+
+**短くてよい。** 3行の記事に価値があります。長さを気にして下書きのまま溜めるほうが損失です。
+
+## よくある失敗
+
+**記事が一覧に出ない**
+
+記事側の YAML に `title` か `date` がありません。あるいは `draft: true` が残っています。`listing` の `contents` に書いたフォルダ名と、実際のフォルダ名が食い違っている場合もあります。
+
+**RSS のリンクを開くと 404 になる**
+
+`site-url` が未設定か、プロジェクトサイトなのに `/<リポジトリ名>/` を含めていません。生成された `_site/index.xml` を開き、中の URL が実際の公開先と一致しているか確認してください。
+
+**日付順に並ばない**
+
+`date` の書式が揃っていません。`2026-05-20` の形（年-月-日）に統一してください。`2026/5/20` は解釈されないことがあります。
+
+**画像が表示されない**
+
+記事のフォルダの中に画像を置き、`![](thumbnail.png)` のようにファイル名だけで参照してください。`/images/...` のようにスラッシュで始めると、プロジェクトサイトでは見つかりません（@sec-github-pages）。
+
+**記事を消したのにサイトに残っている**
+
+`_site/` は差分更新されるため、手元の古い出力が残っています。GitHub Actions 側は毎回まっさらな環境でビルドするので、公開サイトでは消えているはずです。手元だけの現象なら `_site/` を削除して再ビルドしてください。
+
+## 参考リンク
+
+- [Quarto: Creating a Blog](https://quarto.org/docs/websites/website-blog.html) — この章の構成の公式版。`posts/` の置き方と一覧の設定
+- [Quarto: Website Listings](https://quarto.org/docs/websites/website-listings.html) — `type` や `fields` の指定、表示形式の見本
+- [Quarto: Website Options](https://quarto.org/docs/reference/projects/websites.html) — `site-url` を含む website 設定の全一覧
+- [GitHub Docs: テンプレートからリポジトリを作成する](https://docs.github.com/ja/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) — **Use this template** の操作と、clone との違い
+- [テンプレートリポジトリ一覧](https://github.com/maple60?tab=repositories&q=quarto-template) — この教材が配布する `quarto-template-*` の置き場所

@@ -1,8 +1,175 @@
 # 個人 Web サイト {#sec-tmpl-personal-site}
 
-<!-- TODO
-- 研究者の個人サイトに載せるもの
-- `quarto-template-personal-site` の使い方
-- 独自ドメインとの組み合わせ
-- 更新を続けるための工夫
--->
+学会で名前を聞いた人が最初にすることは、検索です。そこで出てくるのが所属機関の職員一覧だけだと、何を研究している人なのかは伝わりません。
+
+個人サイトの役割は、**自分の一次情報を1か所に置くこと**です。所属が変わっても URL が変わらない場所を持っておくと、名刺にもメール署名にも同じものを書き続けられます。
+
+## 何を載せ、何を載せないか
+
+載せるものは多くありません。
+
+| 項目 | 内容 |
+|---|---|
+| 名前 | 日本語表記とローマ字表記の両方 |
+| 所属・職位 | 現在のもの |
+| 研究内容 | 3〜5行。専門外の人にも分かる言葉で |
+| 業績 | 別ページへのリンク（@sec-tmpl-cv） |
+| 連絡先 | 職場のメールアドレス |
+| ID | ORCID、researchmap、Google Scholar |
+
+載せないものも決めておいてください。**自宅住所、私用の電話番号、家族の情報は書かない。** メールアドレスは職場のものだけにします。学生の氏名を載せる場合は、本人の同意を取ってください。
+
+## ユーザーサイトを使う
+
+個人サイトは、リポジトリ名を `<あなたのユーザー名>.github.io` にして作ります。これは **ユーザーサイト** と呼ばれ、URL がドメインの直下になります（@sec-github-pages）。
+
+```
+https://<あなたのユーザー名>.github.io/
+```
+
+アカウントにつき1つだけ作れます。個人サイトはこの枠を使うのが自然です。ブログや研究室マニュアルは別リポジトリのプロジェクトサイトにしてください。
+
+**URL が短くなる以外にも利点があります。** パスが `/` から始まるので、プロジェクトサイトで起きるパスのずれを気にせずに済みます。
+
+## 構成
+
+```
+<あなたのユーザー名>.github.io/
+├── _quarto.yml
+├── index.qmd          # 自己紹介
+├── research.qmd       # 研究内容
+├── publications.qmd   # 業績
+├── cv.qmd             # 経歴
+├── images/
+│   └── profile.jpg
+└── .github/workflows/publish.yml
+```
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: website
+  output-dir: _site
+
+lang: ja
+
+website:
+  title: "山田太郎"
+  site-url: "https://<あなたのユーザー名>.github.io/"
+  description: "○○大学。生態学と再現可能な解析手法。"
+  navbar:
+    left:
+      - href: index.qmd
+        text: ホーム
+      - href: research.qmd
+        text: 研究
+      - href: publications.qmd
+        text: 業績
+      - href: cv.qmd
+        text: 経歴
+    right:
+      - icon: github
+        href: https://github.com/<あなたのユーザー名>
+
+format:
+  html:
+    theme: cosmo
+    toc: false
+```
+
+トップページでは `toc: false` にしてください。目次を出すほどの見出しがないページに目次が付くと、余白ばかりが目立ちます。
+
+## トップページを `about` で作る
+
+Quarto には自己紹介ページ専用の仕組みがあります。YAML に `about` を書くだけで、写真とリンクを配置したレイアウトになります。
+
+```{.markdown filename="index.qmd"}
+---
+title: "山田太郎"
+subtitle: "○○大学 ○○研究科 助教"
+about:
+  template: trestles
+  image: images/profile.jpg
+  image-shape: round
+  links:
+    - icon: envelope
+      text: Email
+      href: mailto:yamada@example.ac.jp
+    - icon: github
+      text: GitHub
+      href: https://github.com/<あなたのユーザー名>
+    - text: ORCID
+      href: https://orcid.org/0000-0000-0000-0000
+---
+
+野外調査で得たデータから、群集の構造が環境の変化にどう応じるかを調べています。
+解析の手順を再現できる形で残すことにも関心があります。
+
+## 学歴
+
+- 2024年 ○○大学大学院 博士課程修了（博士（理学））
+- 2021年 ○○大学大学院 修士課程修了
+```
+
+`template` は5種類あります。写真と本文の並べ方が変わるだけなので、実際に切り替えて選んでください。
+
+| テンプレート | 見え方 |
+|---|---|
+| `jolla` | 写真が中央上、その下に本文。最も簡素 |
+| `trestles` | 写真が左、本文が右。経歴を並べるのに向く |
+| `solana` | 写真が上、リンクが横並び |
+| `marquee` | 写真が大きく背景に近い扱い |
+| `broadside` | 写真が上部いっぱい |
+
+`about` を書いた `.qmd` では、`---` の下に普通の Markdown を続けられます。学歴や職歴はそこに書いてください。
+
+## 独自ドメインを使う
+
+`yamada.example.com` のような自分のドメインを使えます。手順は @sec-custom-domain のとおりです。
+
+**ユーザーサイトに独自ドメインを設定すると、同じアカウントのプロジェクトサイトも全部そのドメインの下に移動します。** `<ユーザー名>.github.io/blog/` は `yamada.example.com/blog/` になります。既存の URL を配ってしまっているなら、影響を確認してから設定してください。
+
+個人サイトで独自ドメインを使う理由は、**所属が変わっても URL が変わらないこと**です。大学の個人ページは異動で消えます。GitHub のユーザー名を変えたときにも、独自ドメインなら URL を維持できます。
+
+ドメインの更新は忘れると失効します。自動更新を有効にし、通知の届くアドレスを確認しておいてください。
+
+## 更新を続けるための工夫
+
+個人サイトは、作った直後が最も充実していて、そこから放置されます。**更新が要らない構造にする**のが対策です。
+
+**更新頻度で分ける。** 「研究内容」は数年変わりません。「業績」は随時増えます。同じページに混ぜると、業績を1件足すために研究紹介まで読み返すことになります。
+
+**業績は自動生成にする。** `.bib` から作れば、更新は文献管理ソフトへの登録だけで済みます（@sec-tmpl-cv）。
+
+**「最近の活動」を作らない。** 更新が止まった瞬間に、サイト全体が古く見えます。時系列の記録が欲しいならブログを別に持ってください（@sec-tmpl-blog）。
+
+**年に1回、日を決めて見直す。** 年度初めに所属と肩書きを確認するだけで、大きな齟齬は防げます。
+
+## よくある失敗
+
+**トップページが表示されず、README が表示される**
+
+リポジトリ名が `<あなたのユーザー名>.github.io` と完全に一致しているか確認してください。大文字小文字も含めて一致が必要です。また、**Settings** → **Pages** の設定が済んでいるかも確認してください（@sec-github-pages）。
+
+**写真が表示されない**
+
+`image:` のパスが `.qmd` から見た相対パスになっているか確認してください。`images/profile.jpg` と書けば、プロジェクト直下の `images/` を指します。
+
+**`about` のリンクにアイコンが出ない**
+
+`icon:` に指定できるのは Bootstrap Icons の名前です。ORCID のように該当するアイコンがないものは、`icon` を省略して `text` だけにしてください。
+
+**メールアドレスに迷惑メールが増えた**
+
+公開ページのアドレスは収集されます。`mailto:` を避けて画像にする方法もありますが、読み手の手間が増えます。職場のアドレスを載せ、迷惑メールの振り分けは受信側で対処するのが現実的です。
+
+**別のサイトも独自ドメインに移動してしまった**
+
+ユーザーサイトの設定は、そのアカウントのプロジェクトサイト全体に及びます。元に戻すには、ユーザーサイトの独自ドメイン設定を外してください（@sec-custom-domain）。
+
+## 参考リンク
+
+- [Quarto: About Pages](https://quarto.org/docs/websites/website-about.html) — `about` の5つのテンプレートと、リンク・画像の指定方法
+- [Quarto: Website Navigation](https://quarto.org/docs/websites/website-navigation.html) — navbar の構成方法
+- [GitHub Docs: GitHub Pages とは](https://docs.github.com/ja/pages/getting-started-with-github-pages/what-is-github-pages) — ユーザーサイトとプロジェクトサイトの違い
+- [Bootstrap Icons](https://icons.getbootstrap.com/) — `icon:` に指定できるアイコン名の一覧
+- [テンプレートリポジトリ一覧](https://github.com/maple60?tab=repositories&q=quarto-template) — `quarto-template-personal-site` の置き場所。**Use this template** から作れる
