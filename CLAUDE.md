@@ -83,7 +83,7 @@
 - 3.9 Web サイト（複数ページ・ナビゲーション）
 - 3.10 見た目の調整（テーマ・CSS）
 
-### 第4部 公開する
+### 第4部 公開する — GitHub Pages
 - 4.1 GitHub Pages の仕組み
 - 4.2 GitHub Actions による自動ビルド
 - 4.3 `docs/` 方式と `gh-pages` 方式

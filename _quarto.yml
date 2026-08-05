@@ -63,7 +63,7 @@ book:
         - chapters/p3-quarto/09-website.qmd
         - chapters/p3-quarto/10-theming.qmd
 
-    - part: "第4部 公開する"
+    - part: "第4部 公開する — GitHub Pages"
       chapters:
         - chapters/p4-publish/01-github-pages.qmd
         - chapters/p4-publish/02-github-actions.qmd
