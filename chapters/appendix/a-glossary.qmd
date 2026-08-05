@@ -1,0 +1,8 @@
+# 用語集 {#sec-glossary}
+
+<!-- TODO
+- Git / GitHub 関連の用語
+- Quarto 関連の用語
+- Web 公開関連の用語
+- 各用語から本文の該当箇所へリンクする
+-->

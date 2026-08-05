@@ -1,0 +1,9 @@
+# 30分で1ページ公開する {#sec-quickstart}
+
+<!-- TODO
+- GitHub アカウントを作り、リポジトリを1つ作る
+- `index.qmd` を用意する（最小限の内容）
+- GitHub Actions の設定ファイルを置く
+- GitHub Pages を有効にし、公開 URL を確認する
+- よくある失敗 — 反映されない、404 になる
+-->

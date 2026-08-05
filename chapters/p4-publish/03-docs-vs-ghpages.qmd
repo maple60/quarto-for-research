@@ -1,0 +1,8 @@
+# `docs/` 方式と `gh-pages` 方式 {#sec-docs-vs-ghpages}
+
+<!-- TODO
+- 3つの公開方式（`docs/` / `gh-pages` ブランチ / Actions 直接）
+- それぞれの利点と欠点
+- どれを選ぶべきか
+- 途中で方式を切り替える手順
+-->

@@ -1,0 +1,9 @@
+# `.qmd` の基本構造と YAML {#sec-qmd-basics}
+
+<!-- TODO
+- YAML ヘッダ・本文・コードチャンクの3要素
+- Markdown の書き方（見出し・強調・リスト・リンク）
+- よく使う YAML オプション
+- `quarto render` と `quarto preview` の違い
+- よくある失敗 — YAML のインデントとコロンの後の空白
+-->

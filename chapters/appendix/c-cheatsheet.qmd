@@ -1,0 +1,8 @@
+# チートシート {#sec-cheatsheet}
+
+<!-- TODO
+- よく使う Git コマンド
+- よく使う Quarto コマンド
+- YAML オプションの早見表
+- Markdown 記法の早見表
+-->

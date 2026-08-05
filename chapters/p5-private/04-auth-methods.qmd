@@ -1,0 +1,8 @@
+# 認証方法 {#sec-auth-methods}
+
+<!-- TODO
+- ワンタイムパスコード（メールに届く番号）
+- Google / Microsoft アカウント
+- 所属機関のアカウント（SAML / OIDC）
+- 用途に応じた選び方
+-->

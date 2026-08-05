@@ -1,0 +1,8 @@
+# 何が起きたのかの解説 {#sec-quickstart-explained}
+
+<!-- TODO
+- 3つの場所（手元 / GitHub のリポジトリ / 公開サイト）を区別する
+- push が引き金になって GitHub Actions が動く
+- `.qmd` が `.html` に変換される
+- ここから先、どの章を読むとよいか
+-->

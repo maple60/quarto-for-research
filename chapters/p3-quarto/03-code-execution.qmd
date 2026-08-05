@@ -1,0 +1,9 @@
+# コード実行（R / Python） {#sec-code-execution}
+
+<!-- TODO
+- コードチャンクの書き方
+- 実行オプション（`echo` / `eval` / `warning` / `output`）
+- `freeze` による実行結果のキャッシュ
+- エンジンの選択（knitr / jupyter）
+- よくある失敗 — 手元では動くのに CI で落ちる
+-->

@@ -1,0 +1,8 @@
+# 個人 Web サイト {#sec-tmpl-personal-site}
+
+<!-- TODO
+- 研究者の個人サイトに載せるもの
+- `quarto-template-personal-site` の使い方
+- 独自ドメインとの組み合わせ
+- 更新を続けるための工夫
+-->

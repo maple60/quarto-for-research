@@ -1,0 +1,8 @@
+# Cloudflare の役割 {#sec-cloudflare-overview}
+
+<!-- TODO
+- CDN・DNS・Zero Trust の位置づけ
+- Cloudflare Pages と Workers の違い
+- GitHub Pages との使い分け（公開は Pages、限定公開は Cloudflare）
+- 無料枠でどこまでできるか
+-->

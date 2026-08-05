@@ -1,0 +1,8 @@
+# CV・業績一覧 {#sec-tmpl-cv}
+
+<!-- TODO
+- 業績一覧を `.bib` から自動生成する
+- 更新の手間を減らす構成
+- PDF 版の CV をどうするか
+- researchmap や ORCID との関係
+-->

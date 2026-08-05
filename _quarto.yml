@@ -1,6 +1,9 @@
 project:
   type: book
   output-dir: _site
+  # slides/ は独立した Quarto プロジェクト。教材本体のビルドには含めない。
+  render:
+    - "!slides/"
 
 # サイト全体の言語。目次・検索・「次のページ」などの UI 文言が日本語になる。
 lang: ja
@@ -23,6 +26,80 @@ book:
   repo-actions: [edit, issue]
   chapters:
     - index.qmd
+
+    - part: "第0部 はじめに"
+      chapters:
+        - chapters/p0-intro/01-about.qmd
+        - chapters/p0-intro/02-why.qmd
+        - chapters/p0-intro/03-overview.qmd
+        - chapters/p0-intro/04-setup.qmd
+
+    - part: "第1部 まず公開してみる"
+      chapters:
+        - chapters/p1-quickstart/01-publish.qmd
+        - chapters/p1-quickstart/02-explained.qmd
+
+    - part: "第2部 土台をつくる — Git と GitHub"
+      chapters:
+        - chapters/p2-github/01-git-vs-github.qmd
+        - chapters/p2-github/02-commit-push.qmd
+        - chapters/p2-github/03-branch-pr.qmd
+        - chapters/p2-github/04-gitignore.qmd
+        - chapters/p2-github/05-readme.qmd
+        - chapters/p2-github/06-release.qmd
+        - chapters/p2-github/07-what-to-store.qmd
+        - chapters/p2-github/08-visibility-license.qmd
+
+    - part: "第3部 書く — Quarto"
+      chapters:
+        - chapters/p3-quarto/01-what-is-quarto.qmd
+        - chapters/p3-quarto/02-qmd-basics.qmd
+        - chapters/p3-quarto/03-code-execution.qmd
+        - chapters/p3-quarto/04-figures-tables.qmd
+        - chapters/p3-quarto/05-crossref-math.qmd
+        - chapters/p3-quarto/06-citations.qmd
+        - chapters/p3-quarto/07-output-formats.qmd
+        - chapters/p3-quarto/08-revealjs.qmd
+        - chapters/p3-quarto/09-website.qmd
+        - chapters/p3-quarto/10-theming.qmd
+
+    - part: "第4部 公開する"
+      chapters:
+        - chapters/p4-publish/01-github-pages.qmd
+        - chapters/p4-publish/02-github-actions.qmd
+        - chapters/p4-publish/03-docs-vs-ghpages.qmd
+        - chapters/p4-publish/04-custom-domain.qmd
+        - chapters/p4-publish/05-troubleshooting.qmd
+
+    - part: "第5部 限定公開する — Cloudflare"
+      chapters:
+        - chapters/p5-private/01-why-private.qmd
+        - chapters/p5-private/02-cloudflare-overview.qmd
+        - chapters/p5-private/03-cloudflare-access.qmd
+        - chapters/p5-private/04-auth-methods.qmd
+        - chapters/p5-private/05-design-patterns.qmd
+
+    - part: "第6部 用途別テンプレート"
+      chapters:
+        - chapters/p6-templates/01-blog.qmd
+        - chapters/p6-templates/02-cv.qmd
+        - chapters/p6-templates/03-lab-manual.qmd
+        - chapters/p6-templates/04-software-docs.qmd
+        - chapters/p6-templates/05-personal-site.qmd
+        - chapters/p6-templates/06-slides.qmd
+
+    - part: "第7部 発展"
+      chapters:
+        - chapters/p7-advanced/01-cloudflare-r2.qmd
+        - chapters/p7-advanced/02-zenodo.qmd
+        - chapters/p7-advanced/03-reproducibility.qmd
+        - chapters/p7-advanced/04-collaboration.qmd
+
+  appendices:
+    - chapters/appendix/a-glossary.qmd
+    - chapters/appendix/b-troubleshooting.qmd
+    - chapters/appendix/c-cheatsheet.qmd
+    - chapters/appendix/d-links.qmd
 
 format:
   html:

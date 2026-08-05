@@ -1,0 +1,8 @@
+# 研究室マニュアル {#sec-tmpl-lab-manual}
+
+<!-- TODO
+- 何を書くか（装置の使い方・安全・引き継ぎ）
+- `quarto-template-lab-manual` の使い方
+- 限定公開との組み合わせ
+- 複数人で更新する運用
+-->

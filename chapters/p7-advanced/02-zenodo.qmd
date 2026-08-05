@@ -1,0 +1,8 @@
+# Zenodo 連携と DOI 取得 {#sec-zenodo}
+
+<!-- TODO
+- DOI を付ける意味
+- GitHub リリースと Zenodo の連携設定
+- 引用方法を README に書く
+- バージョンごとの DOI と代表 DOI
+-->

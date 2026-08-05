@@ -1,0 +1,8 @@
+# Quarto とは {#sec-what-is-quarto}
+
+<!-- TODO
+- Markdown + コード実行 + 複数形式への出力
+- R Markdown との関係、移行するべきか
+- Word や LaTeX と何が違うか
+- 使いどころと、使わないほうがよい場面
+-->

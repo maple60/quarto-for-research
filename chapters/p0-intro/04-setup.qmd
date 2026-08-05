@@ -1,0 +1,9 @@
+# 環境構築 {#sec-setup}
+
+<!-- TODO
+- Git のインストールと初期設定（`user.name` / `user.email`）
+- Quarto のインストール（Windows / macOS / Linux）
+- VS Code と Quarto 拡張機能
+- R / Python — 必要な人だけ、後回しでよい理由
+- 動作確認の手順と、よくある失敗
+-->
