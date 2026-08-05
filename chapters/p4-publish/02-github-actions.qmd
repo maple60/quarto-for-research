@@ -1,8 +1,182 @@
 # GitHub Actions による自動ビルド {#sec-github-actions}
 
-<!-- TODO
-- ワークフローファイルの読み方
-- Quarto をビルドする定番の設定
-- 実行ログの見方とエラーの探し方
-- 実行時間と無料枠
--->
+第1部で `.github/workflows/publish.yml` を写しました。あのとき「内容はあとで読み解く」と書いたのが、この章です。
+
+中身が分かっていれば、失敗したときにどこを見ればよいかが分かります。逆に、分からないまま使っていると、赤いバツが出た瞬間に手が止まります。
+
+## 4つの言葉
+
+GitHub Actions の説明には、似た言葉が並びます。先に整理します。
+
+- **ワークフロー（workflow）** — 「いつ、何をするか」を書いた1つのファイル。`.github/workflows/` に置く
+- **ジョブ（job）** — ワークフローの中の作業のまとまり。ジョブごとに新しいコンピュータが割り当てられる
+- **ステップ（step）** — ジョブの中の1手順。上から順に実行される
+- **アクション（action）** — 誰かが作って公開した部品。`uses:` で呼び出す
+
+ファイル名は自由です。`publish.yml` でも `deploy.yml` でも構いません。**置き場所だけが決まっています。** `.github/workflows/` の直下でないと、GitHub は認識しません。
+
+## 1行ずつ読む
+
+第1部で作ったファイルを、上から順に見ていきます。
+
+```yaml
+name: Publish
+```
+
+Actions タブに表示される名前です。日本語でも構いません。
+
+```yaml
+on:
+  push:
+    branches: [main]
+```
+
+**引き金**の指定です。「main ブランチに push されたら実行する」という意味になります。ここを変えれば、別の合図で動かせます。
+
+```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+```
+
+`workflow_dispatch` を足すと、Actions タブに **Run workflow** ボタンが出ます。原稿を変えずに公開処理だけやり直したいときに便利なので、足しておくことを勧めます。
+
+```yaml
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+```
+
+このワークフローに与える権限です。「リポジトリの中身は読むだけ」「Pages には書き込んでよい」「本人確認用のトークンを発行してよい」と指定しています。
+
+必要な権限だけを与えるのが原則です。`contents: write` を書いてしまうと、ワークフローがリポジトリの中身を書き換えられる状態になります。この設定では不要です。
+
+```yaml
+concurrency:
+  group: pages
+  cancel-in-progress: false
+```
+
+同じグループの処理が重ならないようにします。続けて2回 push したとき、1回目の公開処理を中断せず順番に実行する、という指定です。
+
+`cancel-in-progress: true` にすると、新しい push が来た時点で古い処理を打ち切ります。速い代わりに、公開が中途半端な状態で止まる可能性があります。公開処理では `false` が安全です。
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+```
+
+ここからジョブです。`build` はジョブに付けた名前で、自由に決められます。`runs-on` は「どんなコンピュータで動かすか」の指定です。`ubuntu-latest` は GitHub が用意する使い捨ての Linux で、ジョブが終わると消えます。
+
+```yaml
+    steps:
+      - uses: actions/checkout@v5
+```
+
+最初のステップです。空のコンピュータにリポジトリの中身を持ってきます。`@v5` はバージョンの指定で、これがないと動作が勝手に変わることがあります。
+
+```yaml
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.36
+```
+
+Quarto をインストールします。`with:` は、そのアクションに渡す設定です。`version` を指定しなければ最新版が入りますが、**手元と同じバージョンに固定することを勧めます。** 固定しないと、Quarto 側の更新だけでビルド結果が変わり、原因の分かりにくい不具合になります。手元のバージョンは `quarto --version` で確認できます。
+
+```yaml
+      - run: quarto render
+```
+
+`uses:` が既製の部品を呼ぶのに対し、`run:` はコマンドをそのまま実行します。この1行が、手元で実行しているのと同じ変換処理です。
+
+```yaml
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+```
+
+出来上がった `_site` を、次のジョブに渡せる形で保管します。`path` を間違えると、次のジョブが空のサイトを公開します。Quarto の `output-dir` を変えた場合は、ここも合わせてください。
+
+```yaml
+  deploy:
+    needs: build
+```
+
+2つ目のジョブです。`needs: build` は「build が成功してから実行する」という意味です。これがないと、ビルドと同時に公開処理が走ります。
+
+```yaml
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+```
+
+保管された成果物を GitHub Pages に配置します。ここまでで、push から公開までが一続きになります。
+
+## ログの見方
+
+赤いバツが出たら、次の順で追います。
+
+1. リポジトリの **Actions** タブを開く
+2. 失敗した実行（赤いバツ）をクリックする
+3. 左側で、失敗したジョブをクリックする
+4. 赤い印の付いたステップをクリックして展開する
+
+展開すると実行ログが出ます。**エラーの原因はログの末尾ではなく、途中にあることが多いです。** 末尾には「Process completed with exit code 1」のような結果だけが出ていて、原因は数十行上に書かれています。
+
+ログ画面で `Ctrl` + `F` を使い、`error` や `ERROR` を探すのが確実です。Quarto のエラーなら、たいてい失敗した `.qmd` のファイル名と行番号が出ています。
+
+右上の歯車から **Re-run jobs** を選ぶと、同じ内容でやり直せます。ネットワークの一時的な不調で失敗した場合は、これで通ることがあります。
+
+## コード実行を含む場合
+
+R や Python のコードを含む文書では、ビルドするコンピュータにもそれらが必要になります。しかし、毎回インストールすると時間がかかり、パッケージの版が変わって結果が変わる危険もあります。
+
+Quarto の `freeze` を使えば、多くの場合これを避けられます。
+
+```{.yaml filename="_quarto.yml"}
+execute:
+  freeze: auto
+```
+
+こう書いておくと、手元で実行した結果が `_freeze/` フォルダに保存されます。これをコミットしておけば、GitHub 側では計算をやり直さず、保存された結果を再利用します。R も Python もインストール不要になり、ビルドは数十秒で終わります。
+
+`_freeze/` を `.gitignore` に入れてはいけません。詳しくは @sec-code-execution で扱います。
+
+## 実行時間と料金
+
+**Public リポジトリでは、Actions の実行時間は無料です。** 上限もありません。
+
+Private リポジトリでは、プランごとに無料枠（Free プランは月2,000分）が決まっていて、超えると課金されます。文書のビルドは1回1〜3分程度なので、個人利用で枠を使い切ることはまずありませんが、Private で運用する場合は使用量を意識してください。使用量は **Settings** → **Billing** で確認できます。
+
+## よくある失敗
+
+**ワークフローが動かない（Actions タブに何も出ない）**
+
+ファイルの置き場所を疑ってください。`.github/workflows/publish.yml` でなければ認識されません。`github/workflows/`（先頭のピリオドがない）や `.github/workflow/`（複数形でない）が定番の間違いです。
+
+**`Missing download info for actions/...` と出る**
+
+アクション名かバージョンの綴りが違います。`@v5` の部分を含めて、公式リポジトリの表記と1文字ずつ照らし合わせてください。
+
+**`Error: Failed to create deployment` と出る**
+
+**Settings** → **Pages** の **Source** が **GitHub Actions** になっていません。@sec-github-pages の手順を確認してください。
+
+**手元では通るのに Actions で失敗する**
+
+ファイル名の大文字小文字が原因のことがあります。Windows と macOS は `Figure1.png` と `figure1.png` を同じものとして扱いますが、Actions の Linux は区別します。エラーに出ているファイル名を、実際のファイルと1文字ずつ照合してください。
+
+**ビルドは緑なのにサイトが更新されない**
+
+`upload-pages-artifact` の `path` が実際の出力先と食い違っている可能性があります。`_quarto.yml` の `output-dir` と一致しているか確認してください。
+
+## 参考リンク
+
+- [GitHub Docs: GitHub Actions](https://docs.github.com/ja/actions) — 全体像の入口。用語の定義もここにある
+- [GitHub Docs: ワークフロー構文](https://docs.github.com/ja/actions/reference/workflow-syntax-for-github-actions) — `on` や `permissions` に書ける値の網羅的な一覧
+- [GitHub Docs: ワークフロー実行ログを使う](https://docs.github.com/ja/actions/monitoring-and-troubleshooting-workflows/using-workflow-run-logs) — ログの読み方と再実行の手順
+- [quarto-actions](https://github.com/quarto-dev/quarto-actions) — `setup` に渡せる設定の一覧。R / Python を入れる例も載っている
+- [GitHub Docs: GitHub Actions の課金](https://docs.github.com/ja/billing/managing-billing-for-github-actions/about-billing-for-github-actions) — 無料枠の正確な条件

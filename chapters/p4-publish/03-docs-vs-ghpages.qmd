@@ -1,8 +1,151 @@
 # `docs/` 方式と `gh-pages` 方式 {#sec-docs-vs-ghpages}
 
-<!-- TODO
-- 3つの公開方式（`docs/` / `gh-pages` ブランチ / Actions 直接）
-- それぞれの利点と欠点
-- どれを選ぶべきか
-- 途中で方式を切り替える手順
--->
+Quarto のサイトを GitHub Pages で公開する方法は、1つではありません。検索すると3つの流儀が出てきて、書かれている手順が食い違うため混乱します。
+
+この章で3つを並べ、どれを選ぶべきかを決めます。結論を先に書くと、**この教材では Actions 方式を勧めます。** ただし他の2つを選ぶ理由もあるので、判断できるようにしておきます。
+
+## 分かれ目は「どこでビルドするか」
+
+3つの違いは、突き詰めると2点です。**変換作業を手元で行うか GitHub で行うか**、そして**変換後のファイルをリポジトリに置くか置かないか**。
+
+```{mermaid}
+flowchart TD
+  A["どこでビルドするか"] --> B["手元でビルドする"]
+  A --> C["GitHub でビルドする"]
+  B --> D["出力を main の docs/ に置く<br>= docs/ 方式"]
+  B --> E["出力を gh-pages ブランチに置く<br>= gh-pages 方式"]
+  C --> F["出力はリポジトリに残さない<br>= Actions 方式"]
+```
+
+## `docs/` 方式
+
+手元で `quarto render` を実行し、出来上がったファイルを `docs/` フォルダに入れて、原稿と一緒にコミットします。GitHub 側は `docs/` の中身をそのまま配信するだけです。
+
+設定は `_quarto.yml` の1行です。
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: book
+  output-dir: docs
+```
+
+さらに、リポジトリの直下に `.nojekyll` という空のファイルを置きます。これがないと、GitHub が Jekyll という別の仕組みで再加工しようとし、`_` で始まるフォルダ（Quarto が作る `_files` など）が無視されて、図やスタイルが読み込まれなくなります。
+
+```bash
+touch .nojekyll
+```
+
+Windows の PowerShell では次のようにします。
+
+```powershell
+New-Item -ItemType File .nojekyll
+```
+
+最後に **Settings** → **Pages** で **Source** を **Deploy from a branch** にし、ブランチ `main`、フォルダ `/docs` を選びます。
+
+以降は、原稿を直したら `quarto render` を実行し、`docs/` ごとコミットして push します。**render を忘れると、原稿だけが更新されてサイトが古いままになります。**
+
+利点は、仕組みが単純なことです。Actions もブランチも登場しません。何が公開されているかを `docs/` の中を見て直接確認できます。
+
+欠点は、履歴が読めなくなることです。原稿を1文字直すたびに、変換後のファイル数十個の差分が同じコミットに混ざります。`git log` で「何を書き換えたのか」を追うのが困難になります。共同編集では、この差分がほぼ毎回衝突します。
+
+## `gh-pages` 方式
+
+手元でビルドする点は同じですが、出力を `main` ではなく `gh-pages` という専用ブランチに置きます。Quarto にはこれ専用のコマンドがあります。
+
+```bash
+quarto publish gh-pages
+```
+
+このコマンドは、ビルド、`gh-pages` ブランチへの配置、push までを一度に行います。初回は確認を求められ、`_publish.yml` という記録ファイルが作られます。
+
+実行後、**Settings** → **Pages** の **Source** が **Deploy from a branch**、ブランチが `gh-pages`、フォルダが `/ (root)` になっているか確認してください。
+
+`docs/` 方式との違いは、変換後のファイルが `main` の履歴に入らないことです。`main` には原稿だけが残るので、`git log` が読める状態を保てます。
+
+欠点は2つあります。1つは、公開が「コマンドを実行した人の手元の環境」に依存すること。Quarto のバージョンや、インストールされている R パッケージが人によって違えば、出来上がるサイトも変わります。もう1つは、`quarto publish` を実行し忘れると公開されないことです。push しただけでは何も起きません。
+
+## Actions 方式
+
+第1部で使った方法です。原稿だけを push し、変換は GitHub 側で行います。変換後のファイルはどのブランチにも残りません。
+
+利点は次の3点です。
+
+- **`main` に原稿だけが残る。** 履歴が読める
+- **公開の手順が `git push` だけになる。** 誰が push しても同じ環境でビルドされる
+- **ビルドの成否が記録に残る。** 失敗すれば Actions タブに赤いバツが出る
+
+欠点は、設定ファイルを1つ書く必要があることと、失敗したときにログを読む必要があることです。第1部で写した内容がほぼそのまま使えるため、実際の手間は最初の1回だけです。
+
+## 比較表
+
+| | `docs/` 方式 | `gh-pages` 方式 | Actions 方式 |
+|---|---|---|---|
+| ビルドする場所 | 手元 | 手元 | GitHub |
+| 出力をコミットするか | する（`main`） | する（`gh-pages`） | しない |
+| `main` の履歴 | 読みにくい | 読める | 読める |
+| 公開の操作 | render → push | `quarto publish` | push |
+| 忘れやすい手順 | render | publish | なし |
+| 共同編集 | 衝突しやすい | 可能 | 向いている |
+| 初期設定の手間 | 小 | 小 | 中 |
+
+## どれを選ぶか
+
+**原則は Actions 方式です。** 特に、共著者がいる場合や、長く更新し続ける文書では他の選択肢を検討する必要がありません。
+
+`docs/` 方式を選ぶ理由があるとすれば、次のような場合です。
+
+- Actions で再現できない環境が必要（特殊なフォント、有償ソフト、大きなデータ）
+- 手元でビルドした結果を1文字も変えずに公開したい
+
+`gh-pages` 方式は、Actions を使えない事情があり、かつ `main` の履歴は汚したくない、という中間の選択肢です。組織の設定で Actions が制限されている場合に該当します。
+
+なお、コードの実行結果が問題で Actions を避けようとしているなら、まず `freeze` を検討してください（@sec-github-actions）。手元で計算した結果を保存しておけば、GitHub 側で R や Python を動かす必要はなくなります。
+
+## 方式を切り替える
+
+途中で変えられます。順序を守れば、サイトが落ちる時間はほとんどありません。
+
+**`docs/` 方式から Actions 方式へ**
+
+1. `.github/workflows/publish.yml` を作る（第1部の内容をそのまま使えます）
+2. `_quarto.yml` の `output-dir` を `_site` に戻す
+3. `.gitignore` に `/_site/` を追加する
+4. `git rm -r --cached docs` を実行し、追跡済みの `docs/` を外す
+5. **Settings** → **Pages** の **Source** を **GitHub Actions** に変える
+6. コミットして push し、Actions が緑になるのを待つ
+
+`git rm --cached` は、Git の追跡から外すだけで手元のファイルは消しません。手元の `docs/` は、公開の確認が取れてから削除してください。
+
+**Actions 方式から `docs/` 方式へ**
+
+上の逆をたどります。先に `output-dir: docs` に変えて render・commit・push し、`docs/` が GitHub 上にあることを確認してから、**Source** を **Deploy from a branch** に変えます。
+
+## よくある失敗
+
+**`docs/` 方式で、図やスタイルだけが表示されない**
+
+`.nojekyll` がありません。`_` で始まるフォルダが無視されている状態です。リポジトリの直下（`docs/` の中ではありません）に空のファイルを置いてください。
+
+**方式を変えたのに古いサイトが表示され続ける**
+
+**Source** の変更を忘れています。ビルドの方式を変えても、GitHub がどこを見に行くかは **Settings** → **Pages** の指定のままです。
+
+**`docs/` 方式で、サイトが数日前の内容のまま止まっている**
+
+`quarto render` を実行せずに push しています。この方式では、原稿を直しただけでは何も変わりません。render を忘れないよう、`git commit` の前に必ず実行する癖をつけてください。
+
+**`quarto publish gh-pages` が認証で止まる**
+
+`gh-pages` ブランチへの push 権限が必要です。第1部と同じく、初回はブラウザでの許可を求められます。手元で `git push` が通る状態になっているか、先に確認してください。
+
+**`gh-pages` ブランチを間違えて編集した**
+
+このブランチの中身は毎回作り直されるため、手で編集しても次の `quarto publish` で消えます。原稿は必ず `main` で編集してください。
+
+## 参考リンク
+
+- [Quarto: GitHub Pages](https://quarto.org/docs/publishing/github-pages.html) — 3方式すべての公式手順。`.nojekyll` や `quarto publish` の詳細もここ
+- [GitHub Docs: 公開元を設定する](https://docs.github.com/ja/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) — **Source** で選べる値と、ブランチ・フォルダの指定方法
+- [GitHub Docs: カスタム ワークフローを使う](https://docs.github.com/ja/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) — Actions 方式に切り替えるときの前提
+- [Quarto: Quarto Projects](https://quarto.org/docs/projects/quarto-projects.html) — `output-dir` をはじめとするプロジェクト設定の一覧
