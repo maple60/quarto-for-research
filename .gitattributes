@@ -1,0 +1,13 @@
+# 改行コードをリポジトリ内では LF に統一する。
+# Windows / macOS / Linux が混在しても、差分が改行だけで汚れなくなる。
+* text=auto eol=lf
+
+# バイナリは変換しない。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ico binary
