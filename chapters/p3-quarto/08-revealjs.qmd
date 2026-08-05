@@ -1,8 +1,249 @@
+---
+# この章はコードチャンクの書き方を「文字として」示すため、実行エンジンを止めている
+engine: markdown
+---
+
 # Reveal.js スライド {#sec-revealjs}
 
-<!-- TODO
-- スライドの区切り方
-- よく使うオプション（テーマ・段階表示・レイアウト）
-- 発表者ノートとタイマー
-- PDF への書き出しと配布
--->
+スライドも `.qmd` から作れます。出力形式を `revealjs` にするだけです。Reveal.js は、ブラウザで動くスライドの仕組みです。
+
+```{.yaml filename="intro.qmd"}
+---
+title: "研究計画の中間報告"
+author: "山田太郎"
+format: revealjs
+---
+```
+
+PowerPoint との違いは、原稿がテキストであることです。Git で履歴を追え、解析コードの結果をそのまま図として貼れ、公開すれば URL を配るだけで済みます。
+
+## スライドの区切り方
+
+見出しがそのままスライドの区切りになります。
+
+```{.markdown filename="intro.qmd"}
+---
+title: "研究計画の中間報告"
+format: revealjs
+---
+
+# 背景
+
+## これまでに分かっていること
+
+- 先行研究では A が示されている
+- ただし B の条件では未検証
+
+## 未解決の問題
+
+C の影響が定量化されていない
+
+# 手法
+
+## 実験の設計
+
+...
+```
+
+`#` は節の区切り、`##` が1枚のスライドになります。`#` だけのスライドは、章の扉として大きく中央に表示されます。
+
+見出しを付けずにスライドを区切りたいときは、`---` を単独の行に書きます。
+
+## よく使う設定
+
+`_quarto.yml` か YAML ヘッダに書きます。このリポジトリの `slides/_quarto.yml` も同じ形です。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  revealjs:
+    theme: default
+    slide-number: c/t
+    show-slide-number: all
+    progress: true
+    center: false
+    incremental: false
+    menu:
+      side: right
+```
+
+| 設定 | 効果 |
+|---|---|
+| `theme` | 配色。`default` `simple` `dark` `beige` など11種類 |
+| `slide-number` | ページ番号の形式。`c/t` は「現在/全体」 |
+| `progress` | 下端に進捗バーを出す |
+| `center` | 内容を縦方向に中央寄せするか |
+| `incremental` | 箇条書きを1つずつ表示するか |
+| `footer` | 全スライドの下端に出す文字列 |
+| `logo` | 右下に置く画像 |
+| `transition` | 切り替えの動き。`none` `fade` `slide` |
+
+`center: false` を勧めます。既定の `true` では内容が縦中央に来るため、スライドごとに文字の位置が変わり、視線が上下に動きます。
+
+### 箇条書きを1つずつ出す
+
+全体で有効にするなら `incremental: true`、特定のリストだけなら次のように囲みます。
+
+```{.markdown filename="intro.qmd"}
+::: {.incremental}
+- 1つ目
+- 2つ目
+- 3つ目
+:::
+```
+
+多用しないでください。聞き手が全体像を把握できなくなり、質問が出にくくなります。結論を伏せる必要がある場面だけに絞るのが実務的です。
+
+## レイアウト
+
+### 2列に分ける
+
+```{.markdown filename="intro.qmd"}
+:::: {.columns}
+
+::: {.column width="50%"}
+左側の内容
+:::
+
+::: {.column width="50%"}
+![](images/plot.png)
+:::
+
+::::
+```
+
+外側のコロンが4つ、内側が3つである点に注意してください。数が同じだと入れ子になりません。
+
+### 文字を小さくする
+
+内容が入りきらないときは、スライドの見出しにクラスを付けます。
+
+```{.markdown filename="intro.qmd"}
+## 測定結果の一覧 {.smaller}
+```
+
+それでも収まらないなら `{.scrollable}` を付けます。スライド内をスクロールできるようになります。ただし、発表時にスクロールが必要なスライドは情報が多すぎる合図です。まず内容を減らすことを考えてください。
+
+### 図を全面に出す
+
+```{.markdown filename="intro.qmd"}
+## 実験風景 {background-image="images/field.jpg"}
+```
+
+## コードと図
+
+解析コードをそのまま載せられます。
+
+````{.markdown filename="intro.qmd"}
+```{r}
+#| echo: true
+#| fig-align: center
+plot(cars)
+```
+````
+
+行を順に強調したいときは `code-line-numbers` を使います。
+
+````{.markdown filename="intro.qmd"}
+```{r}
+#| echo: true
+#| code-line-numbers: "1|3-4"
+d <- read.csv("data/survey.csv")
+d <- subset(d, !is.na(value))
+m <- lm(value ~ group, data = d)
+summary(m)
+```
+````
+
+`"1|3-4"` は「まず1行目を強調し、次に3〜4行目を強調する」という指定です。矢印キーで進むたびに強調が移ります。コードを説明する発表で効きます。
+
+## 発表者ノートとタイマー
+
+各スライドにメモを付けられます。
+
+```{.markdown filename="intro.qmd"}
+## 実験の設計
+
+- 3群、各30個体
+
+::: {.notes}
+群分けの根拠を聞かれたら、予備実験の結果を出す。
+:::
+```
+
+発表中に `S` キーを押すと、発表者用の別ウィンドウが開きます。そこにはノート、次のスライド、経過時間が表示されます。聴衆側の画面には出ません。
+
+発表中に使えるキーを挙げます。
+
+| キー | 動作 |
+|---|---|
+| `→` / `Space` | 次へ |
+| `←` | 前へ |
+| `S` | 発表者ノートを開く |
+| `F` | 全画面 |
+| `O` または `Esc` | スライド一覧 |
+| `B` | 画面を暗くする（板書や実演のとき） |
+| `?` | ショートカット一覧 |
+
+`B` は覚えておくと便利です。聴衆の注意をスライドから外したいときに使えます。
+
+## PDF に書き出す
+
+配布資料が必要なときは PDF にできます。LaTeX は不要です。
+
+1. スライドを Chrome または Edge で開く
+2. URL の末尾に `?print-pdf` を付けて再読み込みする
+3. 印刷ダイアログを開き、送信先を「PDF に保存」にする
+4. 用紙サイズを「横」、余白を「なし」、背景のグラフィックを「有効」にする
+
+右下のメニュー（`menu` を有効にしている場合）からも同じ操作を呼び出せます。
+
+`incremental` で段階表示にした箇所は、PDF では1枚にまとめて出力されます。段階ごとに別ページにしたい場合は `pdf-separate-fragments: true` を指定します。
+
+## この教材での配置
+
+このリポジトリでは、スライドを `slides/` に独立した Quarto プロジェクトとして置いています。教材本体（book）とスライド（revealjs）では出力形式が違うため、1つのプロジェクトにまとめられないからです。
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: book
+  render:
+    - "!slides/"
+```
+
+教材本体の `_quarto.yml` で `slides/` を除外し、スライド側は別に変換して `_site/slides/` に置きます。結果として `https://<ユーザー名>.github.io/<リポジトリ名>/slides/intro.html` で公開されます。
+
+同じ内容を教材とスライドの両方に載せたい場合、原稿を共有するより、それぞれ書いたほうが結果的に楽です。スライドは1枚あたりの情報量を絞る必要があり、そのまま流用しても読みにくいものにしかなりません。
+
+## よくある失敗
+
+**スライドが区切られず、1枚に全部入る**
+
+見出しのレベルを間違えています。`##` が1枚のスライドです。`###` は同じスライドの中の小見出しとして扱われます。
+
+**内容が下にはみ出て見えない**
+
+Reveal.js はスライドの高さを超えた部分を表示しません。`{.smaller}` を付けるか、内容を2枚に分けてください。長い表や大きな図は、そもそもスライドに向きません。
+
+**発表者ノートが開かない**
+
+ブラウザのポップアップブロックが働いています。許可してください。また、ローカルのファイルを直接開いている場合は動きません。`quarto preview` で開くか、公開したページで確認してください。
+
+**`:::` の数を間違えて列が崩れる**
+
+外側は `::::`（4つ）、内側は `:::`（3つ）です。同じ数だと、入れ子ではなく並列と解釈されます。
+
+**日本語のフォントが細くて見えない**
+
+Reveal.js の既定テーマは欧文フォントを前提にしています。プロジェクションでは細い文字が飛ぶので、SCSS でフォントと太さを指定してください（@sec-theming）。このリポジトリの `slides/custom.scss` がその例です。
+
+**発表当日にインターネットがつながらない**
+
+公開した URL だけを頼りにしていると、会場のネットワーク次第で詰みます。事前に PDF を書き出しておくか、`_site/slides/` のフォルダごと USB メモリに入れておいてください。Reveal.js の出力は、フォルダごと持ち運べばオフラインでも動きます。
+
+## 参考リンク
+
+- [Quarto: Revealjs](https://quarto.org/docs/presentations/revealjs/) — スライドの作り方の公式解説。この章の内容の元になっている
+- [Quarto: Presenting Slides](https://quarto.org/docs/presentations/revealjs/presenting.html) — 発表者ノート、キー操作、チョークボード機能
+- [Quarto: Advanced Reveal](https://quarto.org/docs/presentations/revealjs/advanced.html) — PDF 書き出し、アニメーション、独自スタイルの当て方
+- [Quarto: Reveal Options](https://quarto.org/docs/reference/formats/presentations/revealjs.html) — 設定できる項目の全一覧
+- [Reveal.js 公式サイト](https://revealjs.com/) — Quarto が内部で使っているスライド機能そのもの。動作の確認に使える

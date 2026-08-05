@@ -1,8 +1,226 @@
 # 見た目の調整（テーマ・CSS） {#sec-theming}
 
-<!-- TODO
-- 組み込みテーマから選ぶ
-- SCSS で部分的に上書きする
-- 日本語フォントの指定と、Web フォントを使うかの判断
-- やりすぎないための指針
--->
+Quarto の HTML 出力は、何も指定しなくても読める見た目になります。この章では、そこからどこまで手を入れるか、どこで止めるかを扱います。
+
+先に結論を書きます。**組み込みテーマを1つ選び、日本語向けの調整を10行ほど足す。それ以上は必要になってから。** 見た目に時間を使うより、中身を書いたほうが読まれます。
+
+## 組み込みテーマを選ぶ
+
+Quarto には Bootswatch という配色集が同梱されています。25種類あり、名前を書くだけで切り替わります。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  html:
+    theme: cosmo
+```
+
+よく使われるものを挙げます。
+
+| テーマ | 印象 |
+|---|---|
+| `cosmo` | 標準的で癖がない。迷ったらこれ |
+| `flatly` | 落ち着いた青緑。研究室サイトに合う |
+| `litera` | 文章主体の読み物向け |
+| `sandstone` | 温かみのあるグレー |
+| `journal` | 見出しが強め |
+| `darkly` | 暗い背景 |
+
+明暗を切り替えられるようにもできます。閲覧者の環境に合わせて自動で選ばれ、右上のボタンで手動でも切り替えられます。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+```
+
+実際にどう見えるかは、Bootswatch のサイトで確認できます（参考リンク参照）。文字だけの説明で選ぶより、見比べたほうが早く決まります。
+
+## SCSS で部分的に上書きする
+
+テーマを選んだうえで、一部だけ変えたいときは SCSS ファイルを足します。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  html:
+    theme:
+      - cosmo
+      - assets/custom.scss
+```
+
+配列で書くと、上から順に適用されます。`cosmo` を土台にして、`custom.scss` で上書きする、という意味です。
+
+SCSS ファイルの中身は、2つの区画に分かれます。
+
+```{.scss filename="assets/custom.scss"}
+/*-- scss:defaults --*/
+
+$body-color: #1f2328;
+$link-color: #0b6bcb;
+$line-height-base: 1.85;
+
+
+/*-- scss:rules --*/
+
+p {
+  margin-bottom: 1.1em;
+}
+```
+
+**`scss:defaults`** には変数を書きます。Bootstrap があらかじめ用意している変数を上書きする場所で、`$` で始まる名前を指定します。ここで色や字間を変えると、それを使っているすべての要素に一度に反映されます。
+
+**`scss:rules`** には通常の CSS を書きます。変数では届かない細かい指定をここに書きます。
+
+この区分は重要です。色を変えたいとき、`scss:rules` に `body { color: ... }` と書いても、テーマ側の指定に負けて効かないことがあります。変数で指定できるものは、必ず `scss:defaults` 側に書いてください。
+
+よく使う変数を挙げます。
+
+| 変数 | 対象 |
+|---|---|
+| `$body-color` | 本文の文字色 |
+| `$body-bg` | 背景色 |
+| `$link-color` | リンクの色 |
+| `$font-family-sans-serif` | 本文のフォント |
+| `$font-family-monospace` | コードのフォント |
+| `$font-size-root` | 基準の文字サイズ |
+| `$line-height-base` | 行間 |
+| `$primary` | テーマの主色。ボタンや見出しの装飾に使われる |
+
+## 日本語向けの調整
+
+ここが実質的な本題です。Bootstrap のテーマは欧文を前提に作られているため、日本語をそのまま流し込むと読みにくくなります。最低限、次の3点を調整してください。
+
+### フォントを指定する
+
+```{.scss filename="assets/custom.scss"}
+/*-- scss:defaults --*/
+
+$font-family-sans-serif:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Hiragino Sans",
+  "Noto Sans JP",
+  "BIZ UDPGothic",
+  "Yu Gothic UI",
+  Meiryo,
+  "Segoe UI",
+  sans-serif !default;
+```
+
+カンマ区切りで並べたものを、前から順に試し、閲覧者の環境にあるものが使われます。macOS 向け、Windows 向けの順に並べておけば、どちらでも意図した見た目になります。
+
+### 行間を広げる
+
+```{.scss filename="assets/custom.scss"}
+$line-height-base: 1.85 !default;
+```
+
+欧文向けの既定値（1.5 前後）では、日本語は詰まって見えます。1.8 前後にすると、長い文章が読みやすくなります。
+
+### 禁則処理を効かせる
+
+```{.scss filename="assets/custom.scss"}
+/*-- scss:rules --*/
+
+body {
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+```
+
+`line-break: strict` は、行頭に句読点や閉じ括弧が来ないようにする指定です。`overflow-wrap: break-word` は、長い URL がはみ出すのを防ぎます。
+
+この教材の `assets/custom.scss` が、ここまでの内容をまとめた実例です。読んで、自分のサイトに写して構いません。
+
+## Web フォントを使うかどうか
+
+「游ゴシックではなく Noto Sans JP を全員に見せたい」という場合、Web フォントを読み込む方法があります。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  html:
+    include-in-header:
+      text: |
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+```
+
+ただし、日本語の Web フォントには無視できない代償があります。
+
+**読み込みが重い。** 日本語フォントは収録文字数が多く、欧文フォントの数十倍の容量があります。回線が細い環境では、文字が表示されるまで待たされます。
+
+**外部への通信が発生する。** 閲覧者のブラウザが Google のサーバーに接続します。研究室の内部向けページや、閲覧者の記録が残ることを避けたい場面では、これが問題になります。
+
+この教材では Web フォントを使っていません。各 OS に入っているフォントを順に試す方式にしています。見た目が環境によって多少変わりますが、表示は速く、外部通信も発生しません。**サイトの性格上どうしても統一が必要でない限り、この方針を勧めます。**
+
+## CSS を直接書く
+
+SCSS を使わず、CSS ファイルを指定することもできます。
+
+```{.yaml filename="_quarto.yml"}
+format:
+  html:
+    css: assets/styles.css
+```
+
+ただし、テーマ変数が使えないため、テーマ側の指定と競合しやすくなります。新しく始めるなら SCSS のほうが扱いやすく、書ける内容も上位互換です。
+
+特定のページだけに当てたいときは、そのページの YAML に書きます。
+
+```{.markdown filename="special.qmd"}
+---
+title: "特設ページ"
+css: special.css
+---
+```
+
+## どこまでやるか
+
+見た目の調整は、際限なく続けられます。止めどころを決めておいてください。目安を挙げます。
+
+**必ずやる** — テーマの選択、日本語フォント、行間、禁則処理。ここまでで読みやすさは大きく変わります。
+
+**必要なら** — 主色を所属機関の色に合わせる、ロゴを置く、見出しの余白を調整する。研究室の公式サイトなど、体裁を求められる場合です。
+
+**やらないほうがよい** — 独自のレイアウトを一から組む、JavaScript でアニメーションを付ける、要素の位置をピクセル単位で決める。Quarto が更新されたときに壊れやすく、直す手間が続きます。画面幅の狭い端末での表示も自分で面倒を見ることになります。
+
+見た目に凝る前に、内容が読みやすい構造になっているかを見直すほうが効果があります。見出しの階層、1段落の長さ、図表の位置。これらは CSS では直りません。
+
+## よくある失敗
+
+**SCSS を書いたのに反映されない**
+
+原因は次の順で疑ってください。
+
+1. `theme` を配列にしていない。`theme: cosmo` のままファイルを追加しても読まれません
+2. ファイルのパスが違う。`_quarto.yml` から見た相対パスで書きます
+3. `scss:defaults` と `scss:rules` の区画の指定がない。どちらの区画にも入っていない記述は無視されます
+4. 変数を `scss:rules` 側に書いている。`$` で始まる変数は `scss:defaults` に書きます
+
+**変更したのにブラウザの表示が変わらない**
+
+ブラウザが古い CSS を覚えています。`Ctrl` + `Shift` + `R`（macOS では `Command` + `Shift` + `R`）で再読み込みしてください。`quarto preview` を一度止めて起動し直すのも確実です。
+
+**色を変えたのに一部だけ古い色のまま残る**
+
+`$primary` などのテーマ変数を使わず、個別の要素に色を書いているためです。テーマ変数で指定できるものは変数で指定してください。
+
+**スマートフォンで表示が崩れる**
+
+固定幅（`width: 800px` など）を指定していると、狭い画面ではみ出します。割合（`%`）か `max-width` を使ってください。
+
+**コードブロックの文字が本文より大きく見える**
+
+日本語の本文と欧文のコードを同じサイズにすると、コードのほうが大きく見えます。`code, pre { font-size: 0.9em; }` のように少し下げるとバランスが取れます。
+
+**スライドのテーマも同じように書ける、と思って失敗する**
+
+Reveal.js は Bootstrap を使っていないため、変数名が違います。スライド用の SCSS は `revealjs` 向けの変数（`$presentation-font-size-root` など）で書いてください（@sec-revealjs）。
+
+## 参考リンク
+
+- [Quarto: HTML Theming](https://quarto.org/docs/output-formats/html-themes.html) — テーマの指定と SCSS の当て方。この章の内容の公式版
+- [Quarto: Sass Variables](https://quarto.org/docs/output-formats/html-themes-more.html) — `scss:defaults` で使える変数の一覧
+- [Bootswatch](https://bootswatch.com/) — 組み込みテーマの見本。実際の表示を見比べて選べる
+- [Quarto: HTML Basics](https://quarto.org/docs/output-formats/html-basics.html) — 目次の位置やコードの折りたたみなど、CSS を書かずに設定で変えられる項目
+- [Quarto: Revealjs Themes](https://quarto.org/docs/presentations/revealjs/themes.html) — スライド側のテーマと変数。HTML とは体系が違う点に注意

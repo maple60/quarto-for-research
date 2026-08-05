@@ -1,8 +1,241 @@
 # Web サイト（複数ページ・ナビゲーション） {#sec-website}
 
-<!-- TODO
-- `book` と `website` の違い、どちらを選ぶか
-- ナビゲーションバーとサイドバーの設定
-- 複数ページの構成の作り方
-- ブログ（listing）の作り方 — 実物はテンプレート側で示す
--->
+ここまでは1つの文書を扱ってきました。この章では、複数のページをまとめて1つのサイトにします。
+
+第1部で作った `_quarto.yml` には `type: website` と書きました。この教材本体は `type: book` です。まずこの2つの違いから始めます。
+
+## `website` と `book` のどちらを選ぶか
+
+| | website | book |
+|---|---|---|
+| ページの関係 | 並列。どこから読んでもよい | 直列。順に読むことを前提とする |
+| ナビゲーション | 上部のバーが中心 | 左のサイドバーが中心 |
+| 番号 | 付かない | 章番号が自動で付く |
+| 「次のページ」 | なし | あり |
+| 用途 | 個人サイト、研究室サイト、ブログ | 教材、マニュアル、論文集 |
+
+判断の基準は「読者が順番に読むか」です。
+
+**順番がある** — book。この教材のように、前の章を前提にして次の章を書く場合です。章番号が付き、`@sec-xxx` の参照が「チャプター 7」と表示され、ページ下部に「次へ」が出ます。
+
+**順番がない** — website。研究室サイトの「メンバー」「研究内容」「アクセス」のように、どのページから見ても成立する場合です。
+
+迷ったら website にしてください。あとから book に変えるのは、`_quarto.yml` の数行の書き換えで済みます。
+
+なお、ブログ機能（記事の一覧を自動生成する仕組み）は book では使えません。ブログを含めたいなら website です。
+
+## website の構成
+
+最小構成は次のとおりです。
+
+```
+myproject/
+├── _quarto.yml
+├── index.qmd
+├── research.qmd
+├── members.qmd
+└── images/
+```
+
+`index.qmd` は必須です。サイトのトップページになります。
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: website
+  output-dir: _site
+
+lang: ja
+
+website:
+  title: "○○研究室"
+  navbar:
+    left:
+      - href: index.qmd
+        text: ホーム
+      - href: research.qmd
+        text: 研究内容
+      - href: members.qmd
+        text: メンバー
+    right:
+      - icon: github
+        href: https://github.com/<あなたのユーザー名>
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+```
+
+`navbar` に並べた項目が、画面上部のメニューになります。`left` と `right` で寄せる位置が変わります。`icon` には Bootstrap Icons の名前が使えます。
+
+ここに書かなかった `.qmd` も変換はされますが、メニューには出ません。URL を直接知っている人だけがアクセスできる状態になります。**これは鍵ではありません。** 見せたくないページは、そもそも公開リポジトリに置かないでください（@sec-visibility-license）。
+
+### 項目をまとめる
+
+メニューの項目が増えたら、ドロップダウンにできます。
+
+```{.yaml filename="_quarto.yml"}
+  navbar:
+    left:
+      - href: index.qmd
+        text: ホーム
+      - text: 研究
+        menu:
+          - href: research/topics.qmd
+            text: テーマ一覧
+          - href: research/publications.qmd
+            text: 業績
+```
+
+### サイドバーを使う
+
+ページ数が多い、あるいは階層があるサイトでは、左側のサイドバーが向きます。マニュアルやドキュメントで使われる形です。
+
+```{.yaml filename="_quarto.yml"}
+website:
+  title: "研究室マニュアル"
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - index.qmd
+      - section: "実験手順"
+        contents:
+          - protocols/pcr.qmd
+          - protocols/staining.qmd
+      - section: "設備"
+        contents:
+          - equipment/microscope.qmd
+```
+
+`style: docked` は常に左に固定する表示、`floating` は本文に重ねる表示です。`contents` を `auto: "*.qmd"` にすると、ファイルを追加するだけでサイドバーに載ります。
+
+navbar とサイドバーは併用できます。上部で大きな区分を切り替え、左側でその中を移動する、という作りになります。
+
+## book の構成
+
+book では、章の並びを `_quarto.yml` に書きます。この教材の設定がそのまま例です。
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: book
+
+book:
+  title: "研究者のための Quarto ガイド"
+  author: "Maple"
+  chapters:
+    - index.qmd
+    - part: "第1部 まず公開してみる"
+      chapters:
+        - chapters/p1-quickstart/01-publish.qmd
+        - chapters/p1-quickstart/02-explained.qmd
+  appendices:
+    - chapters/appendix/a-glossary.qmd
+```
+
+`part` で部に分け、`appendices` に付録を置きます。ここに書いた順序が、そのまま章番号とサイドバーの並びになります。ファイルを追加しても、この一覧に書かなければサイトに現れません。
+
+book の `.qmd` は、YAML ヘッダに `title` を書きません。1行目の `#` 見出しが章タイトルとして使われます。この教材の各章がその形です。
+
+## ブログを作る
+
+記事を書くたびに一覧ページを手で更新するのは現実的ではありません。Quarto の **listing** は、指定したフォルダの中身から一覧を自動生成します。
+
+```
+blog/
+├── _quarto.yml
+├── index.qmd
+└── posts/
+    ├── 2026-04-01-first/
+    │   └── index.qmd
+    └── 2026-04-15-second/
+        └── index.qmd
+```
+
+一覧ページの YAML に `listing` を書きます。
+
+```{.markdown filename="index.qmd"}
+---
+title: "研究ノート"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  feed: true
+---
+```
+
+各記事の側には、一覧に出す情報を書きます。
+
+```{.markdown filename="posts/2026-04-01-first/index.qmd"}
+---
+title: "野外調査の記録"
+date: 2026-04-01
+categories: [調査, 準備]
+description: "初回の調査地選定について"
+---
+```
+
+これで、記事を1つ増やすだけで一覧に載ります。`categories: true` を指定すると、分類による絞り込みが右側に出ます。`feed: true` は RSS を作る指定で、読者が更新を追えるようになります。
+
+記事を1つのフォルダにまとめるのは、その記事で使う画像を同じ場所に置けるからです。記事を消すときもフォルダごと消せます。
+
+冒頭で述べたとおり、listing は book では使えません。教材とブログを同じサイトに同居させたい場合は、website にして教材部分をサイドバーで作るか、別のリポジトリに分けるかの選択になります。この教材は後者を取り、ブログの実物はテンプレートリポジトリ側で示しています（@sec-tmpl-blog）。
+
+## ページ全体に共通の設定
+
+サイト全体で同じにしたい設定は `_quarto.yml` に書きます。よく使うものを挙げます。
+
+```{.yaml filename="_quarto.yml"}
+website:
+  title: "○○研究室"
+  site-url: https://example.github.io/lab/
+  description: "○○大学○○研究室の公式サイト"
+  favicon: images/favicon.png
+  search:
+    location: navbar
+  page-footer:
+    center: "© 2026 ○○研究室"
+  page-navigation: true
+  repo-url: https://github.com/example/lab
+  repo-actions: [edit, issue]
+```
+
+`repo-actions` は、各ページに「編集する」「問題を報告する」リンクを出す設定です。研究室マニュアルのように、読み手にも直してほしい文書で効きます。この教材でも有効にしてあります。
+
+`site-url` は、SNS で共有したときのプレビュー表示や、サイトマップの生成に使われます。公開先が決まったら書いておいてください。
+
+## よくある失敗
+
+**navbar に書いたページが 404 になる**
+
+`href` のパスが `_quarto.yml` から見た相対パスになっているか確認してください。`research.qmd` と書けばプロジェクト直下の `research.qmd` を指します。フォルダに入れているなら `pages/research.qmd` のように書きます。
+
+**トップページが表示されない**
+
+`index.qmd` がありません。ファイル名は `index` でなければならず、`home.qmd` や `top.qmd` では代替できません。
+
+**ページを追加したのにサイトに出ない**
+
+website の場合、`navbar` か `sidebar` に書かないとメニューに現れません（変換自体はされます）。book の場合は、`chapters` に書かないと変換すらされません。
+
+**サイドバーの階層が思ったとおりにならない**
+
+`contents` の入れ子は YAML のインデントで表します。`section` の下の `contents` を2つ下げてください。
+
+**listing に記事が出ない**
+
+記事側の YAML に `title` がないか、`contents` に指定したフォルダの場所が違っています。また、下書きを一覧から外したいときは、記事側に `draft: true` を書きます。
+
+**日付順に並ばない**
+
+記事の `date` の書式が揃っていません。`2026-04-01` の形（年-月-日）で統一してください。
+
+## 参考リンク
+
+- [Quarto: Websites](https://quarto.org/docs/websites/) — website プロジェクトの全体像。この章の内容の公式版
+- [Quarto: Website Navigation](https://quarto.org/docs/websites/website-navigation.html) — navbar とサイドバーの設定項目の一覧
+- [Quarto: Website Listings](https://quarto.org/docs/websites/website-listings.html) — ブログの一覧ページの作り方。表示形式の見本もある
+- [Quarto: Books](https://quarto.org/docs/books/) — book プロジェクトの構成。`part` や `appendices` の指定方法
+- [Bootstrap Icons](https://icons.getbootstrap.com/) — `icon:` に指定できるアイコン名の一覧。GitHub や ORCID のアイコンもここにある
