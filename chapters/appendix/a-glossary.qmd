@@ -1,8 +1,262 @@
 # 用語集 {#sec-glossary}
 
-<!-- TODO
-- Git / GitHub 関連の用語
-- Quarto 関連の用語
-- Web 公開関連の用語
-- 各用語から本文の該当箇所へリンクする
--->
+本文に出てくる用語を分野ごとにまとめます。各項目の末尾に、その用語を詳しく扱っている章を示しました。
+
+読み方は「知らない語に出会ったら引く」で構いません。上から順に読む必要はありません。
+
+## Git と GitHub
+
+Git
+: 変更履歴を記録するソフト。手元のパソコンで動き、インターネットに繋がっていなくても使えます。GitHub とは別物です（@sec-git-vs-github）。
+
+GitHub
+: Git のリポジトリをインターネット上に置くサービス。共有・公開・共同編集のための機能が付いています（@sec-git-vs-github）。
+
+リポジトリ（repository）
+: プロジェクト1つ分の保管場所。フォルダ1つと、その変更履歴すべてを合わせたものです（@sec-commit-push）。
+
+コミット（commit）
+: 変更を1つのまとまりとして履歴に刻む操作、およびその記録そのもの。「いつ・誰が・何を・なぜ変えたか」が残ります（@sec-commit-push）。
+
+ステージ（stage）
+: コミットする前に、記録したい変更を選んで並べておく場所。`git add` で置き、`git commit` でまとめて刻みます（@sec-commit-push）。
+
+プッシュ（push）
+: 手元のコミットを GitHub に送る操作。逆向き、つまり GitHub から手元に持ってくるのがプル（pull）です（@sec-commit-push）。
+
+クローン（clone）
+: GitHub 上のリポジトリを、履歴ごと手元にコピーすること。ダウンロードとの違いは、履歴が付いてくる点です（@sec-commit-push）。
+
+ブランチ（branch）
+: 履歴の枝分かれ。本線を壊さずに作業するために使います。既定の本線は `main` という名前です（@sec-branch-pr）。
+
+マージ（merge）
+: 枝分かれした履歴を合流させること（@sec-branch-pr）。
+
+プルリクエスト（pull request、PR）
+: 「この枝の変更を本線に取り込んでほしい」という提案。GitHub の機能であり、Git の機能ではありません（@sec-branch-pr）。
+
+コンフリクト（conflict）
+: 同じ箇所を別々に変更した結果、Git が自動で合流できなくなった状態。人間がどちらを採るか決めます（@sec-branch-pr、@sec-collaboration）。
+
+`.gitignore`
+: 追跡しないファイルを書いておく設定ファイル。ビルド結果や認証情報を記録から外します（@sec-gitignore）。
+
+README
+: リポジトリのトップに置く説明書。GitHub がリポジトリ画面に自動で表示します（@sec-readme）。
+
+タグ（tag）
+: 特定のコミットに付ける目印。`v1.0.0` のように版を示すのが典型です（@sec-release）。
+
+リリース（release）
+: タグに説明とファイルを添えて、配布物として公開する GitHub の機能（@sec-release）。
+
+フォーク（fork）
+: 他人のリポジトリを自分のアカウントに複製すること。書き込み権限のないリポジトリに変更を提案するときに使います（@sec-collaboration）。
+
+Issue
+: リポジトリに紐づく課題・質問・要望の記録。文章での議論に使います（@sec-collaboration）。
+
+GitHub Actions
+: GitHub 上で処理を自動実行する仕組み。このガイドでは push を引き金にビルドと公開を行わせます（@sec-github-actions）。
+
+ワークフロー（workflow）
+: Actions に実行させる手順を書いた YAML ファイル。`.github/workflows/` に置きます（@sec-github-actions）。
+
+Secrets
+: API トークンなど、リポジトリに直接書けない値を Actions に渡すための保管場所。設定画面から登録し、ワークフローからは名前だけで参照します（@sec-cloudflare-access）。
+
+Git LFS（Large File Storage）
+: 大きなファイルを Git の外に逃がして扱う拡張機能。容量に別枠の制限があります（@sec-what-to-store）。
+
+public / private
+: リポジトリの公開範囲。public は誰でも閲覧でき、private は許可した人だけが見られます（@sec-visibility-license）。
+
+ライセンス
+: 他人がその成果物をどう使ってよいかを示す取り決め。書かないと「原則すべて禁止」と解釈されます（@sec-visibility-license）。
+
+## Quarto と執筆
+
+Quarto
+: 文章とコードを1つのファイルに書き、HTML・PDF・Word・スライドなどに変換する仕組み（@sec-what-is-quarto）。
+
+`.qmd`
+: Quarto の原稿ファイルの拡張子。中身は Markdown に YAML とコードチャンクを足したものです（@sec-qmd-basics）。
+
+Markdown
+: 記号で見出しや強調を表す軽量な記法。`#` で見出し、`**` で太字になります（@sec-qmd-basics）。
+
+Pandoc
+: Quarto が内部で使っている文書変換ソフト。Markdown 記法の細部は最終的に Pandoc の仕様に従います（@sec-what-is-quarto）。
+
+YAML
+: 設定を書くための書式。`キー: 値` の形で書き、字下げで階層を表します。タブ文字は使えません（@sec-qmd-basics）。
+
+フロントマター（front matter）
+: `.qmd` の先頭で `---` に挟まれた部分。そのファイル1つ分の設定を書きます（@sec-qmd-basics）。
+
+`_quarto.yml`
+: プロジェクト全体の設定ファイル。出力先、章の並び、テーマなどをここで決めます（@sec-quickstart-explained）。
+
+レンダー（render）
+: 原稿を出力形式に変換すること。`quarto render` で実行します（@sec-quickstart-explained）。
+
+プレビュー（preview）
+: 変換結果をブラウザで表示し、保存のたびに更新する機能。`quarto preview` で起動します（@sec-what-is-quarto）。
+
+コードチャンク（code chunk）
+: 原稿の中に埋め込んだ実行可能なコード。バッククォート3つに続けて `{r}` や `{python}` と書いた行で始まります（@sec-code-execution）。
+
+チャンクオプション
+: チャンクの先頭に `#|` で書く指定。`echo`（コードを表示するか）、`eval`（実行するか）などがあります（@sec-code-execution）。
+
+knitr
+: R のコードを実行するためのエンジン。R のチャンクを含む原稿で自動的に使われます（@sec-code-execution）。
+
+Jupyter
+: Python のコードを実行するためのエンジン（@sec-code-execution）。
+
+freeze / `_freeze`
+: 実行結果を保存しておき、コードが変わらない限り再実行しない仕組み。公開用のサーバに R や Python を入れずに済みます（@sec-code-execution）。
+
+クロスリファレンス（cross-reference）
+: 図・表・章などを番号で参照する仕組み。`@fig-xxx` のように書くと「図 3」のような表示になります（@sec-crossref-math）。
+
+キャプション（caption）
+: 図や表に付ける説明文。クロスリファレンスを使うには、キャプションとラベルの両方が必要です（@sec-figures-tables）。
+
+BibTeX
+: 文献情報を書き溜めるための書式。拡張子は `.bib` です（@sec-citations）。
+
+CSL（Citation Style Language）
+: 引用と文献リストの体裁を定義するファイル。雑誌ごとの書式がここで決まります（@sec-citations）。
+
+Zotero
+: 文献管理ソフト。BibTeX ファイルの自動書き出しに使えます（@sec-citations）。
+
+callout
+: 注意書きを枠で囲んで目立たせる記法。`::: {.callout-note}` のように書きます（@sec-qmd-basics）。
+
+テーマ（theme）
+: サイト全体の見た目の設定。Quarto には Bootswatch 由来の組み込みテーマが多数あります（@sec-theming）。
+
+SCSS
+: CSS を拡張した記法。Quarto では変数の上書きと追加スタイルを1つのファイルに書けます（@sec-theming）。
+
+Reveal.js
+: Quarto がスライドを作るときに使うライブラリ。出来上がりは HTML なので、ブラウザだけで発表できます（@sec-revealjs）。
+
+プロジェクトの型（`type`）
+: `book`（順番のある文書）、`website`（並列のページ群）、`default`（単独ファイル）の3種類。`_quarto.yml` の `project: type:` で指定します（@sec-website）。
+
+listing
+: 指定したフォルダの記事を自動で一覧表示する機能。ブログの記事一覧に使います（@sec-tmpl-blog）。
+
+## Web 公開
+
+静的サイト（static site）
+: あらかじめ作った HTML をそのまま配る形式のサイト。表示のたびに計算しないため、速く、壊れにくく、多くの場合は無料で置けます（@sec-github-pages）。
+
+GitHub Pages
+: リポジトリの内容を Web サイトとして公開する GitHub の機能（@sec-github-pages）。
+
+ユーザーサイト / プロジェクトサイト
+: `<ユーザー名>.github.io` という名前のリポジトリから公開するのが前者、それ以外のリポジトリから `<ユーザー名>.github.io/<リポジトリ名>/` で公開するのが後者です（@sec-github-pages）。
+
+`docs/` 方式
+: ビルド結果を `docs/` フォルダにコミットして公開する方法。Actions を使わない代わりに、出力もリポジトリに入ります（@sec-docs-vs-ghpages）。
+
+`gh-pages` ブランチ
+: ビルド結果だけを置く専用のブランチ。原稿と出力を分けられます（@sec-docs-vs-ghpages）。
+
+`.nojekyll`
+: GitHub Pages に「Jekyll での加工は不要」と伝える空ファイル。これがないと、`_` で始まるフォルダが無視されます（@sec-docs-vs-ghpages）。
+
+独自ドメイン（custom domain）
+: `example.com` のように自分で取得した住所。GitHub Pages にも設定できます（@sec-custom-domain）。
+
+DNS
+: ドメイン名を実際のサーバの場所に対応づける仕組み。設定を変えても反映に時間がかかります（@sec-custom-domain）。
+
+A レコード / CNAME レコード
+: DNS の設定項目。前者は IP アドレスを直接指定し、後者は別の名前へ転送します（@sec-custom-domain）。
+
+apex ドメイン
+: `example.com` のように、先頭にサブドメインが付かない形。`www.example.com` はサブドメインです（@sec-custom-domain）。
+
+HTTPS
+: 通信を暗号化した接続。GitHub Pages では証明書が自動で発行されます（@sec-custom-domain）。
+
+CDN（配信網）
+: 世界各地のサーバから内容を配る仕組み。速くなる反面、更新の反映に少し時間がかかります（@sec-publish-troubleshooting）。
+
+キャッシュ（cache）
+: 一度読み込んだ内容を手元やサーバに保存しておくこと。更新したのに古い表示が出る原因の多くはこれです（@sec-publish-troubleshooting）。
+
+404
+: 「そのページは見つからない」という応答。原因はサイト全体・個別ページ・付属ファイルの3種類に分かれます（@sec-publish-troubleshooting）。
+
+## 限定公開と Cloudflare
+
+Cloudflare
+: DNS・配信・アクセス制御をまとめて提供する事業者。このガイドでは限定公開に使います（@sec-cloudflare-overview）。
+
+ネームサーバ（name server）
+: そのドメインの DNS 設定をどこが管理しているかを示すもの。Cloudflare を使うには、ここを Cloudflare に向けます（@sec-cloudflare-overview）。
+
+Zero Trust
+: 「社内・社外」で区切らず、アクセスのたびに本人確認する考え方。Cloudflare Access はこの枠組みの製品です（@sec-cloudflare-overview）。
+
+Cloudflare Access
+: サイトの前に立つ門番。ログインを求め、条件に合う人だけを通します（@sec-cloudflare-access）。
+
+アプリケーション（Access application）
+: 「どの URL を守るか」の単位。Access ではこの単位で保護を設定します（@sec-cloudflare-access）。
+
+ポリシー（policy）
+: 「誰を通し、誰を弾くか」の規則。メールアドレス、ドメイン、所属などで指定します（@sec-private-patterns）。
+
+ID プロバイダ（IdP）
+: 本人確認を担当する側。Google、Microsoft、所属機関の認証基盤などを選べます（@sec-auth-methods）。
+
+ワンタイム PIN
+: メールに届く使い捨ての番号でログインする方式。相手にアカウントを作らせずに済みます（@sec-auth-methods）。
+
+SAML
+: 組織の認証基盤と外部サービスをつなぐ規格。所属機関のアカウントでログインさせたい場合に使います（@sec-auth-methods）。
+
+Cloudflare Workers
+: Cloudflare 上でファイルを配信・処理する仕組み。ビルド済みのサイトを置く先として使います（@sec-cloudflare-access）。
+
+Wrangler
+: Workers を操作するコマンド。設定は `wrangler.jsonc` に書きます（@sec-cloudflare-access）。
+
+Cloudflare R2
+: 大容量ファイルの保管場所。外向きの通信料がかからないのが特徴です（@sec-r2）。
+
+## 研究データと再現性
+
+DOI
+: 論文やデータに付ける恒久的な識別子。URL が変わっても辿れます（@sec-zenodo）。
+
+Zenodo
+: 研究成果を保管し、DOI を発行するサービス。GitHub のリリースと連携できます（@sec-zenodo）。
+
+ORCID
+: 研究者1人に1つ割り当てられる識別子。同姓同名と区別するために使います（@sec-tmpl-cv）。
+
+`CITATION.cff`
+: 「このリポジトリをこう引用してください」を機械可読な形で書くファイル（@sec-readme）。
+
+renv / uv
+: R と Python で、使ったパッケージの版を記録・復元する道具（@sec-reproducibility）。
+
+Docker
+: OS ごと環境を丸ごと固めて配る仕組み。最も強い再現性が得られる代わりに、学習の負担も大きくなります（@sec-reproducibility）。
+
+## 参考リンク
+
+- [Pro Git 日本語版](https://git-scm.com/book/ja/v2) — Git の用語を体系的に説明した公式書籍。全文が無料で読める
+- [GitHub Docs（日本語）](https://docs.github.com/ja) — GitHub 側の用語は日本語版マニュアルが最も正確
+- [Quarto: Guide](https://quarto.org/docs/guide/) — Quarto の機能名から解説を引ける公式の索引
+- [サル先生の Git 入門](https://backlog.com/ja/git-tutorial/) — 図でイメージをつかみたいときに向く日本語資料

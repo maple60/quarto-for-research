@@ -1,8 +1,179 @@
 # 参考リンク {#sec-links}
 
-<!-- TODO
-- 公式ドキュメント
-- 日本語で読める資料
-- 参考にした事例サイト
-- 関連するテンプレートリポジトリ
--->
+各章末に挙げたリンクを、分野ごとに集めました。日本語版のあるページは日本語版を示しています。
+
+調べものの入口として使ってください。個別の話題については、該当する章の末尾のほうが目的に近いリンクが並んでいます。
+
+## Quarto — まず開く場所
+
+- [Quarto 公式サイト](https://quarto.org/) — 本家。最新の機能はここで確認する
+- [Quarto: Guide](https://quarto.org/docs/guide/) — 機能別の索引。やりたいことから引く
+- [Quarto: Get Started](https://quarto.org/docs/get-started/) — インストールから最初の1ページまで
+- [Quarto: Download](https://quarto.org/docs/download/) — インストーラの配布ページ。過去の版もここにある
+- [Quarto の Discussions](https://github.com/quarto-dev/quarto-cli/discussions) — 利用者の質問と回答。同じ症状の報告を探せる
+
+## Quarto — 書く
+
+- [Quarto: Markdown Basics](https://quarto.org/docs/authoring/markdown-basics.html) — 本文で使える記法の一覧
+- [Quarto: Callout Blocks](https://quarto.org/docs/authoring/callouts.html) — 5種類の callout の見た目と使い分け
+- [Quarto: Figures](https://quarto.org/docs/authoring/figures.html) — 画像の挿入、サイズ指定、複数図の配置
+- [Quarto: Tables](https://quarto.org/docs/authoring/tables.html) — Markdown の表記法と、計算結果を表にする方法
+- [Quarto: Cross References](https://quarto.org/docs/authoring/cross-references.html) — 参照できる要素と、ラベルの付け方
+- [Quarto: Cross Reference Options](https://quarto.org/docs/reference/metadata/crossref.html) — 「図」「表」といった表記を変える設定
+- [Quarto: Equations](https://quarto.org/docs/visual-editor/technical.html#equations) — 数式の入力
+- [Quarto: Citations & Footnotes](https://quarto.org/docs/authoring/citations.html) — 引用記法、文献リストの配置、CSL の指定
+- [Pandoc User's Guide](https://pandoc.org/MANUAL.html) — Markdown 記法の細部における最終的な根拠
+
+## Quarto — コードを実行する
+
+- [Quarto: Execution Options](https://quarto.org/docs/computations/execution-options.html) — 実行オプションの一覧と挙動
+- [Quarto: Using R](https://quarto.org/docs/computations/r.html) — knitr エンジンの詳細
+- [Quarto: Using Python](https://quarto.org/docs/computations/python.html) — jupyter エンジンの準備と使い方
+- [Quarto: Code Cells — knitr](https://quarto.org/docs/reference/cells/cells-knitr.html) — チャンクオプションの全一覧
+- [Quarto: Project Code Execution](https://quarto.org/docs/projects/code-execution.html) — `freeze` の正確な挙動
+- [knitr: kable の使い方](https://bookdown.org/yihui/rmarkdown-cookbook/kable.html) — 表の桁数や列名を整える
+- [gt パッケージ](https://gt.rstudio.com/) — 見栄えのする表を作る道具
+
+## Quarto — 出力形式とサイト構成
+
+- [Quarto: All Formats](https://quarto.org/docs/output-formats/all-formats.html) — 出力できる形式の全一覧
+- [Quarto: HTML Basics](https://quarto.org/docs/output-formats/html-basics.html) — HTML 出力で使える機能
+- [Quarto: HTML Options](https://quarto.org/docs/reference/formats/html.html) — 指定できる YAML 項目の全一覧
+- [Quarto: PDF Basics](https://quarto.org/docs/output-formats/pdf-basics.html) — PDF 出力と LaTeX 環境の準備
+- [Quarto: MS Word Basics](https://quarto.org/docs/output-formats/ms-word.html) — `reference-doc` による体裁の指定
+- [Quarto: Quarto Projects](https://quarto.org/docs/projects/quarto-projects.html) — プロジェクト設定と出力先の考え方
+- [Quarto: Websites](https://quarto.org/docs/websites/) — website プロジェクトの全体像
+- [Quarto: Website Navigation](https://quarto.org/docs/websites/website-navigation.html) — navbar とサイドバーの設定項目
+- [Quarto: Website Listings](https://quarto.org/docs/websites/website-listings.html) — 記事一覧ページの作り方
+- [Quarto: Website Search](https://quarto.org/docs/websites/website-search.html) — 検索索引の作られ方と除外指定
+- [Quarto: Website Tools](https://quarto.org/docs/websites/website-tools.html) — 編集リンク、検索、注釈機能
+- [Quarto: About Pages](https://quarto.org/docs/websites/website-about.html) — 自己紹介ページの5つの型
+- [Quarto: Creating a Blog](https://quarto.org/docs/websites/website-blog.html) — `posts/` の置き方と一覧の設定
+- [Quarto: Books](https://quarto.org/docs/books/) — book プロジェクトの構成
+- [Quarto: HTML Code Blocks](https://quarto.org/docs/output-formats/html-code.html) — コピーボタン、行番号、折り返し
+
+## Quarto — 見た目とスライド
+
+- [Quarto: HTML Theming](https://quarto.org/docs/output-formats/html-themes.html) — テーマの指定と SCSS の当て方
+- [Quarto: Sass Variables](https://quarto.org/docs/output-formats/html-themes-more.html) — `scss:defaults` で使える変数の一覧
+- [Bootswatch](https://bootswatch.com/) — 組み込みテーマの見本。表示を見比べて選べる
+- [Bootstrap Icons](https://icons.getbootstrap.com/) — `icon:` に指定できるアイコン名の一覧
+- [Quarto: Revealjs](https://quarto.org/docs/presentations/revealjs/) — スライドの作り方
+- [Quarto: Presenting Slides](https://quarto.org/docs/presentations/revealjs/presenting.html) — 発表者ノート、キー操作、当日の使い方
+- [Quarto: Advanced Reveal](https://quarto.org/docs/presentations/revealjs/advanced.html) — PDF 書き出し、アニメーション、独自スタイル
+- [Quarto: Reveal Options](https://quarto.org/docs/reference/formats/presentations/revealjs.html) — 設定できる項目の全一覧
+- [Quarto: Revealjs Themes](https://quarto.org/docs/presentations/revealjs/themes.html) — スライド側のテーマと変数
+- [Reveal.js 公式サイト](https://revealjs.com/) — Quarto が内部で使っているスライド機能そのもの
+
+## Git と GitHub
+
+- [GitHub Docs（日本語）](https://docs.github.com/ja) — GitHub の公式マニュアル。日本語版が整っている
+- [GitHub Docs: Git について](https://docs.github.com/ja/get-started/using-git/about-git) — Git と GitHub の関係
+- [GitHub Docs: Git のセットアップ](https://docs.github.com/ja/get-started/git-basics/set-up-git) — インストールと初期設定
+- [GitHub Docs: リポジトリについて](https://docs.github.com/ja/repositories/creating-and-managing-repositories/about-repositories) — リポジトリの概念と設定項目
+- [GitHub Docs: GitHub フロー](https://docs.github.com/ja/get-started/using-github/github-flow) — 枝を切ってプルリクエストで取り込む標準的な進め方
+- [GitHub Docs: プルリクエスト](https://docs.github.com/ja/pull-requests) — 作成から取り込みまでの全機能
+- [GitHub Docs: ファイルを無視する](https://docs.github.com/ja/get-started/git-basics/ignoring-files) — `.gitignore` の作成方法とグローバル設定
+- [GitHub Docs: README について](https://docs.github.com/ja/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes) — 配置場所と自動表示の仕組み
+- [GitHub Docs: リリースについて](https://docs.github.com/ja/repositories/releasing-projects-on-github/about-releases) — リリースとタグの関係
+- [GitHub Docs: リリースの管理](https://docs.github.com/ja/repositories/releasing-projects-on-github/managing-releases-in-a-repository) — 作成・編集・削除の手順
+- [GitHub Docs: テンプレートからリポジトリを作成する](https://docs.github.com/ja/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) — **Use this template** の操作と clone との違い
+- [Git 公式サイト](https://git-scm.com/) — インストーラとコマンドの正式な仕様書
+- [Git 公式サイト: Downloads](https://git-scm.com/downloads) — インストーラの配布元
+- [gitignore 公式リファレンス](https://git-scm.com/docs/gitignore) — パターンの正確な文法
+- [git-commit 公式リファレンス](https://git-scm.com/docs/git-commit) — オプションの正確な仕様
+- [git-push 公式リファレンス](https://git-scm.com/docs/git-push) — 送信先の指定方法と、拒否されたときの挙動
+- [git-branch 公式リファレンス](https://git-scm.com/docs/git-branch) — 一覧・作成・削除の仕様
+- [git-merge 公式リファレンス](https://git-scm.com/docs/git-merge) — 合流時の挙動と衝突の扱い
+- [git-tag 公式リファレンス](https://git-scm.com/docs/git-tag) — 注釈付きタグと軽量タグの違い
+- [github/gitignore](https://github.com/github/gitignore) — 言語・ツール別のテンプレート集
+
+## 公開 — GitHub Pages と Actions
+
+- [GitHub Docs: GitHub Pages](https://docs.github.com/ja/pages) — 公開機能の全体像
+- [GitHub Docs: GitHub Pages とは](https://docs.github.com/ja/pages/getting-started-with-github-pages/what-is-github-pages) — ユーザーサイトとプロジェクトサイトの違い
+- [GitHub Docs: GitHub Pages の制限](https://docs.github.com/ja/pages/getting-started-with-github-pages/github-pages-limits) — 容量・通信量・時間の上限
+- [GitHub Docs: 公開元を設定する](https://docs.github.com/ja/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) — **Source** の選択肢とその意味
+- [GitHub Docs: カスタム ワークフローを使う](https://docs.github.com/ja/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) — Actions 方式の前提と制約
+- [GitHub Docs: GitHub Actions](https://docs.github.com/ja/actions) — 自動実行の全体像。用語の定義もここ
+- [GitHub Docs: ワークフロー構文](https://docs.github.com/ja/actions/reference/workflow-syntax-for-github-actions) — 書ける項目の網羅的な一覧
+- [GitHub Docs: ワークフロー実行ログを使う](https://docs.github.com/ja/actions/monitoring-and-troubleshooting-workflows/using-workflow-run-logs) — ログの読み方と再実行の手順
+- [GitHub Docs: GitHub Actions の課金](https://docs.github.com/ja/billing/managing-billing-for-github-actions/about-billing-for-github-actions) — 無料枠の正確な条件
+- [quarto-actions](https://github.com/quarto-dev/quarto-actions) — 公開用ワークフローの提供元。設定項目の一覧がある
+- [Quarto: Publishing Basics](https://quarto.org/docs/publishing/) — 公開方法の一覧
+- [Quarto: GitHub Pages](https://quarto.org/docs/publishing/github-pages.html) — 3方式すべての公式手順
+
+## 公開 — 独自ドメインとトラブル
+
+- [GitHub Docs: カスタム ドメインについて](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages) — apex とサブドメインの違い
+- [GitHub Docs: カスタム ドメインを管理する](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) — **A レコードの最新値はここで確認する**
+- [GitHub Docs: カスタム ドメインを検証する](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages) — 自分のドメインを他人に使われないようにする
+- [GitHub Docs: HTTPS でサイトをセキュリティで保護する](https://docs.github.com/ja/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https) — 証明書の発行条件
+- [GitHub Docs: カスタム ドメインのトラブルシューティング](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages) — DNS と証明書の問題の原因別対処
+- [GitHub Docs: 404 エラーのトラブルシューティング](https://docs.github.com/ja/pages/getting-started-with-github-pages/troubleshooting-404-errors-for-github-pages-sites) — 404 の原因を GitHub 側から整理したもの
+
+## 限定公開 — Cloudflare
+
+- [Cloudflare: Cloudflare Access とは](https://www.cloudflare.com/ja-jp/zero-trust/products/access/) — 門番の役割を担う仕組みの概要（日本語）
+- [Cloudflare: Zero Trust の料金](https://www.cloudflare.com/ja-jp/plans/zero-trust-services/) — 無料枠のユーザー数（日本語）
+- [Cloudflare Docs: Cloudflare One](https://developers.cloudflare.com/cloudflare-one/) — Zero Trust 全体のドキュメントの入口
+- [Cloudflare Docs: サイトを追加する](https://developers.cloudflare.com/fundamentals/manage-domains/add-site/) — ネームサーバ変更の手順
+- [Cloudflare Docs: Self-hosted アプリケーションの追加](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/) — Access アプリケーション作成画面の各項目
+- [Cloudflare Docs: Access ポリシー](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/) — Action、Rule type、Selector と評価順序
+- [Cloudflare Docs: Rule groups](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/groups/) — 名簿を使い回すまとまり
+- [Cloudflare Docs: Lists](https://developers.cloudflare.com/cloudflare-one/reusable-components/lists/) — CSV による一括登録
+- [Cloudflare Docs: Access のログ](https://developers.cloudflare.com/cloudflare-one/insights/logs/audit-logs/) — 誰がいつログインしたかの確認方法
+- [Cloudflare Docs: ID プロバイダ](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/) — 対応している認証方法の一覧
+- [Cloudflare Docs: ワンタイム PIN](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/) — 有効期限と、メールが届かないときの原因
+- [Cloudflare Docs: Google の設定](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/google/) — Google Cloud Console 側の登録手順
+- [Cloudflare Docs: Microsoft Entra ID の設定](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/entra-id/) — Microsoft 365 のアカウントを使う場合
+- [Cloudflare Docs: 汎用 SAML の設定](https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/generic-saml/) — 所属機関の認証基盤と接続する場合の仕様
+- [Cloudflare Docs: Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/) — ビルド済みサイトを配信する仕組み
+- [Cloudflare Docs: Workers の料金](https://developers.cloudflare.com/workers/platform/pricing/) — 無料枠のリクエスト数
+- [Cloudflare Docs: Wrangler の設定](https://developers.cloudflare.com/workers/wrangler/configuration/) — `wrangler.jsonc` に書ける項目
+- [Cloudflare Docs: GitHub Actions からのデプロイ](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) — API トークンの扱いに関する注意
+- [Cloudflare Docs: Pages から Workers への移行](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/) — 古い記事の Pages 手順を読み替える対応表
+
+## 文献管理と引用
+
+- [Zotero](https://www.zotero.org/) — 文献管理ソフト本体
+- [Better BibTeX for Zotero](https://retorque.re/zotero-better-bibtex/) — 自動書き出しと引用キーの設定
+- [Zotero Style Repository](https://www.zotero.org/styles) — `.csl` ファイルの検索と入手。雑誌名で探せる
+- [BibTeX のエントリ形式](https://www.bibtex.com/e/entry-types/) — 種類ごとに必要な項目の一覧
+- [MathJax がサポートする LaTeX 記法](https://docs.mathjax.org/en/latest/input/tex/macros/index.html) — HTML 出力で使えるコマンドの一覧
+- [Detexify](https://detexify.kirelabs.org/classify.html) — 手描きから LaTeX のコマンドを引く
+- [TinyTeX](https://yihui.org/tinytex/) — 軽量な LaTeX 環境。PDF 出力に使う
+
+## 公開範囲・ライセンス・研究データ
+
+- [GitHub Docs: リポジトリの可視性の設定](https://docs.github.com/ja/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility) — public と private の切り替え
+- [GitHub Docs: リポジトリのライセンス](https://docs.github.com/ja/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository) — ライセンスの追加方法と自動判定
+- [Choose a License](https://choosealicense.com/) — 目的から逆引きでライセンスを選べる
+- [クリエイティブ・コモンズ・ライセンスとは](https://creativecommons.jp/licenses/) — CC ライセンスの日本語解説
+- [CC BY 4.0 の日本語表示](https://creativecommons.org/licenses/by/4.0/deed.ja) — この教材の本文が採用しているライセンス
+- [GitHub Docs: GitHub 上の大きなファイルについて](https://docs.github.com/ja/repositories/working-with-files/managing-large-files/about-large-files-on-github) — 容量制限と超えたときの挙動
+- [GitHub Docs: Git Large File Storage について](https://docs.github.com/ja/repositories/working-with-files/managing-large-files/about-git-large-file-storage) — LFS の仕組みと利用条件
+- [GitHub Docs: コンテンツの参照と引用](https://docs.github.com/ja/repositories/archiving-a-github-repository/referencing-and-citing-content) — リポジトリに DOI を付ける流れ
+- [GitHub Docs: CITATION ファイルについて](https://docs.github.com/ja/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files) — Cite this repository ボタンの出し方
+- [Citation File Format](https://citation-file-format.github.io/) — `CITATION.cff` の書式と記入例
+- [Zenodo](https://zenodo.org/) — 研究成果の保管と DOI の発行
+- [ORCID](https://orcid.org/) — 研究者 ID の登録。業績を BibTeX で書き出せる
+- [ORCID ドキュメント（日本語）](https://info.orcid.org/ja/documentation/) — 登録・自動連携・書き出しの手順
+- [FAIR Principles](https://www.go-fair.org/fair-principles/) — 研究データを見つけやすく・使いやすくするための国際的な指針
+- [The Turing Way](https://the-turing-way.netlify.app/) — 再現可能な研究のための実践ガイド
+- [オープンリサーチセンター（NII）](https://rcos.nii.ac.jp/) — 日本国内の研究データ管理に関する情報源
+
+## 日本語で読める入門資料
+
+- [Pro Git 日本語版](https://git-scm.com/book/ja/v2) — Git の公式書籍。全文が無料で読める
+- [サル先生の Git 入門](https://backlog.com/ja/git-tutorial/) — 図が多く、用語のイメージをつかみやすい
+- [セマンティック バージョニング 2.0.0](https://semver.org/lang/ja/) — 版番号の規則の日本語版
+- [Google 検索セントラル: robots.txt の書き方](https://developers.google.com/search/docs/crawling-indexing/robots/intro?hl=ja) — クロール制御とアクセス制御の違い
+- [Quarto: FAQ for R Markdown Users](https://quarto.org/docs/faq/rmarkdown.html) — `.Rmd` 経験者向けの移行の考え方（英語だが対応表が有用）
+
+## このガイドと関連リポジトリ
+
+- [quarto-for-research リポジトリ](https://github.com/maple60/quarto-for-research) — このガイドのソース。動く実例として参照できる
+- [テンプレートリポジトリ一覧](https://github.com/maple60?tab=repositories&q=quarto-template) — `quarto-template-*` の置き場所。**Use this template** から作れる
+- [pkgdown](https://pkgdown.r-lib.org/) — R パッケージのドキュメントサイトを自動生成する仕組み
+- [YAML 公式サイト](https://yaml.org/) — YAML そのものの仕様

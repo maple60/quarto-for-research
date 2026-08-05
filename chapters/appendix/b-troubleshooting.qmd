@@ -1,8 +1,231 @@
 # トラブルシューティング集 {#sec-troubleshooting}
 
-<!-- TODO
-- 症状から引ける形式にする
-- ビルドが失敗する
-- 公開されない・反映されない
-- 文字化け・レイアウト崩れ
--->
+症状から引ける形にまとめました。エラーメッセージの一部を検索（`Ctrl` + `F`）して探すのが早道です。
+
+「サイトが表示されない」のように原因の場所が分からない場合は、先に @sec-publish-troubleshooting の手順で上流から切り分けてください。この付録は、原因の場所が絞れたあとの対処集です。
+
+::: {.callout-tip}
+## 何かを直す前に
+
+**エラーメッセージ全体を読んでください。** 長く見えても、原因が書かれているのは1〜2行です。ファイル名と行番号を探すのが最短です。
+
+**1つ直したら1つ確認してください。** 複数の設定をまとめて書き換えると、どれが効いたのか分からなくなります。
+:::
+
+## 環境構築でつまずく
+
+**`git` / `quarto` は認識されないコマンドです、と言われる**
+
+ほとんどはターミナルを開き直していないことが原因です。すべてのターミナルを閉じ、開き直してから再実行してください。VS Code 内のターミナルを使っているなら、VS Code 自体を再起動します。
+
+それでも直らないなら、インストーラを再実行してください。Windows では PATH（コマンドの探し場所）への登録が漏れていることがあります（@sec-setup）。
+
+**`quarto check` で R や Python に警告が出る**
+
+入れていなければ当然の結果です。`Quarto` と `Pandoc` に `[✓]` が付いていれば、コードを含まない文書は変換できます（@sec-setup）。
+
+**`Author identity unknown` と出てコミットできない**
+
+Git に名前とメールアドレスを教えていません。次の2つを実行してください。
+
+```bash
+git config --global user.name "<あなたの名前>"
+```
+
+```bash
+git config --global user.email "<あなたのメールアドレス>"
+```
+
+**Windows で `sudo` や `ls -a` が動かない**
+
+このガイドは Windows では PowerShell を想定しています。`sudo` は Linux のコマンドです。隠しファイルを見るには `ls -Force` を使ってください（@sec-setup）。
+
+## Git と GitHub
+
+**`git push` が `rejected` で拒否される**
+
+GitHub 側に、手元にないコミットがあります。Web 画面で編集した、別の端末から送った、といった場合です。先に取り込んでから送り直します。
+
+```bash
+git pull --rebase
+```
+
+```bash
+git push
+```
+
+**`src refspec main does not match any` と出る**
+
+まだ1つもコミットしていないか、ブランチ名が `master` になっています。`git log --oneline` で履歴の有無を、`git branch` で現在のブランチ名を確認してください（@sec-commit-push）。
+
+**認証を求められ、パスワードを入れても弾かれる**
+
+GitHub はパスワードでの認証を廃止しています。ブラウザ経由の認証か、パスワードの代わりに個人アクセストークンを使ってください（@sec-commit-push）。
+
+**`.gitignore` を書いたのに `_site` が `git status` に出続ける**
+
+すでに追跡対象に入っています。`.gitignore` は、これから追跡するかどうかを決めるだけです。
+
+```bash
+git rm --cached -r _site
+```
+
+`--cached` を忘れると手元のファイルまで消えます（@sec-gitignore）。
+
+**コンフリクトが起きて先に進めない**
+
+該当ファイルを開くと、`<<<<<<<`、`=======`、`>>>>>>>` で両方の内容が並んでいます。残したい形に手で書き直し、記号の行をすべて消してから `git add` と `git commit` を実行してください（@sec-branch-pr）。
+
+**API キーやパスワードをコミットして push してしまった**
+
+ファイルを消しても履歴からは読み出せます。**発行元でその鍵を無効化し、新しいものを発行し直してください。** これが唯一の確実な対処です（@sec-gitignore）。
+
+**大きなファイルを push できない**
+
+GitHub には1ファイルあたりの上限があります。データは別の場所に置き、リポジトリには取得方法を書くのが基本です（@sec-what-to-store、@sec-r2）。
+
+## Quarto のビルド
+
+**`quarto render` が YAML のエラーで止まる**
+
+確認するのは3点です。コロンの後ろに半角スペースが1つあるか、字下げが半角スペースで揃っているか、タブ文字が混ざっていないか。YAML はタブ文字を受け付けません（@sec-qmd-basics）。
+
+値に `:` や `#` を含む場合は、値全体を `"` で囲みます。
+
+**コードチャンクの実行でビルドが止まる**
+
+エラーはコードの問題です。まず R / Python 側で単独に実行し、通ることを確かめてください。パッケージが無い、ファイルのパスが違う、のどちらかが大半です。
+
+一時的に結果だけ残して先へ進めたいなら、そのチャンクに `#| eval: false` を付けます（@sec-code-execution）。
+
+**画像が出力に含まれない**
+
+パスが違います。`.qmd` から見た相対パスで書いてください。`C:\Users\...` のような絶対パスや、`/images/fig1.png` のようなスラッシュ始まりのパスは、公開後に壊れます（@sec-figures-tables）。
+
+**参照した番号が `?fig-xxx` と表示される**
+
+参照先が存在しません。ラベルの綴りを確認してください。あわせて、次の2点も見ます。
+
+- ラベルの接頭辞が種類と合っているか（図は `fig-`、表は `tbl-`、節は `sec-`）
+- 図・表にキャプションが付いているか。キャプションのない要素は参照できません
+
+節を参照する場合は、`_quarto.yml` に `number-sections: true` が必要です（@sec-crossref-math）。
+
+**引用が `[@smith2020]` のまま出力される**
+
+`.bib` ファイルが読み込まれていないか、その引用キーが `.bib` に存在しません。フロントマターの `bibliography:` のパスと、`.bib` 内のキーの綴りを確認してください（@sec-citations）。
+
+**文献リストが出ない、または途中で消える**
+
+引用していない文献は既定では並びません。すべて載せたいなら `nocite: |` に `@*` を指定します（@sec-citations、@sec-tmpl-cv）。
+
+**変更したのにプレビューに反映されない**
+
+`quarto preview` は変更のあったページだけを処理することがあります。全体を確認するときは `quarto render` を使ってください。
+
+コードの結果が古いままなら、`_freeze/` に保存された実行結果が使われています。該当ファイルの `_freeze/` 以下を削除するか、`execute: freeze: false` で確認してください（@sec-code-execution）。
+
+**`_quarto.yml` に書いたページがサイトに出ない**
+
+`chapters:` や `contents:` のパスの綴りとファイルの実在を確認してください。Quarto はプロジェクトの `.qmd` を自動で拾いますが、並び順に載らないページは navbar やサイドバーから辿れません（@sec-website）。
+
+## 公開・表示
+
+**Actions タブに何も表示されない**
+
+ワークフローファイルの場所か綴りが違います。`.github/workflows/publish.yml` という階層になっているか確認してください（@sec-github-actions）。
+
+**手元では通るのに Actions で失敗する**
+
+原因はほぼ2つです。
+
+1. **ファイル名の大文字小文字。** Actions が動く Linux は `Fig1.png` と `fig1.png` を区別します。Windows と macOS は既定で区別しません
+2. **手元にしかないファイル。** `.gitignore` で除外した、あるいはコミットし忘れたファイルを参照しています
+
+2つ目は `git status` では見つかりません。GitHub 上でそのファイルが見えるかを直接確認してください（@sec-publish-troubleshooting）。
+
+**Actions が `Permission denied` や 403 で失敗する**
+
+ワークフローに書き込み権限がありません。`permissions:` の指定と、リポジトリの **Settings** → **Actions** → **General** にある **Workflow permissions** を確認してください（@sec-github-actions）。
+
+**Actions は緑なのにサイトが 404**
+
+**Settings** → **Pages** の **Source** が意図した方式になっているかを確認します。あわせて、画面上部に表示される URL と、自分が開こうとしている URL が一致しているかを見てください。リポジトリ名を変えると URL も変わります（@sec-github-pages）。
+
+反映には数十秒かかります。緑になった直後の 404 は、1分待ってから判断してください。
+
+**文章は出るが、デザインと図が崩れる**
+
+CSS や画像だけが 404 になっています。`F12` で開発者ツールを開き、**Console** タブで読み込めなかった URL を確認してください。
+
+その URL がドメイン直下を指しているなら、プロジェクトサイトのサブディレクトリの問題です。スラッシュ始まりのパスを自分で書いていないか確認します。`docs/` 方式なら `.nojekyll` の有無も疑ってください（@sec-docs-vs-ghpages）。
+
+**更新したのに古いページが表示される**
+
+まず強制再読み込み（`Ctrl` + `Shift` + `R`、macOS では `Command` + `Shift` + `R`）。それでも古いなら、シークレットウィンドウか別の端末で開いてください。そこで新しく見えるなら、原因はブラウザ側で、時間が経てば解消します（@sec-publish-troubleshooting）。
+
+**独自ドメインで DNS エラーが出る**
+
+DNS の変更は反映に時間がかかります。数時間から1日待ってから再確認してください。それでも直らない場合は、A レコードの値が最新のものか、CNAME と A レコードを同じ名前に重ねて設定していないかを確認します（@sec-custom-domain）。
+
+**設定した独自ドメインが勝手に消える**
+
+`CNAME` ファイルがビルドのたびに上書きされています。原稿側（`_quarto.yml` の `resources:` や、公開対象フォルダ）に `CNAME` を置き、出力に含まれるようにしてください（@sec-custom-domain）。
+
+## 限定公開（Cloudflare）
+
+**Cloudflare の設定をしたのにログイン画面が出ない**
+
+そのドメインのネームサーバが Cloudflare に向いていないか、Access のアプリケーションのパスが実際の URL と食い違っています。ダッシュボードでドメインが **Active** になっているかをまず確認してください（@sec-cloudflare-overview）。
+
+**関係者がログインできない**
+
+ポリシーの条件を確認します。メールアドレスの綴り、ドメイン指定（`@example.ac.jp`）の書式、そして許可（Allow）のポリシーが拒否（Block）より先に評価されているか。ポリシーは上から順に評価されます（@sec-private-patterns）。
+
+**ワンタイム PIN のメールが届かない**
+
+迷惑メールに振り分けられていることが大半です。届かない場合は有効期限も確認してください。時間が経ってから入力すると弾かれます（@sec-auth-methods）。
+
+**ログインは通るのにページが表示されない**
+
+認証は通っているので、配信側の問題です。ビルド結果が正しくアップロードされているかを確認してください（@sec-cloudflare-access）。
+
+**検索エンジンに出したくないのに出てしまった**
+
+`robots.txt` はクロールの依頼であって、アクセス制御ではありません。見せたくないなら、認証で守るのが唯一の方法です（@sec-why-private）。
+
+## 日本語まわり
+
+**日本語が文字化けする**
+
+ファイルの文字コードを確認してください。VS Code の右下に `UTF-8` と表示されていれば正常です。別のものになっていたら、そこをクリックして **Save with Encoding** から `UTF-8` を選び直します（@sec-setup）。
+
+**目次や「次のページ」が英語のまま**
+
+`_quarto.yml` に `lang: ja` が書かれていません。文字化けとは別の問題です。
+
+**「図 1」ではなく「Figure 1」と表示される**
+
+同じく `lang: ja` の指定で解決します。表記そのものを変えたい場合は `crossref:` で個別に指定できます（@sec-crossref-math）。
+
+**日本語のファイル名やフォルダ名で不具合が出る**
+
+環境によって扱いが異なり、URL でも読みにくい形になります。ファイル名は半角英数字とハイフンに統一してください。
+
+## それでも解決しないとき
+
+症状を1行で書けるところまで絞ってから、検索するか人に聞いてください。「サイトが見えない」では答えようがありませんが、「Actions は緑だが CSS だけ 404 になる」なら答えが返ってきます。
+
+質問には次の3つを添えてください。
+
+- リポジトリの URL（public なら、それだけで大半は分かります）
+- エラーメッセージのうち `error` を含む行の前後10行
+- `quarto --version` の出力と OS
+
+## 参考リンク
+
+- [Quarto の Discussions](https://github.com/quarto-dev/quarto-cli/discussions) — 利用者の質問と回答。同じ症状の報告を探せる
+- [GitHub Docs: ワークフロー実行ログを使う](https://docs.github.com/ja/actions/monitoring-and-troubleshooting-workflows/using-workflow-run-logs) — Actions のログの読み方と再実行の手順
+- [GitHub Docs: GitHub Pages サイトの 404 エラーのトラブルシューティング](https://docs.github.com/ja/pages/getting-started-with-github-pages/troubleshooting-404-errors-for-github-pages-sites) — 404 の原因を GitHub 側から整理したもの
+- [GitHub Docs: カスタム ドメインのトラブルシューティング](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages) — DNS と証明書の問題の原因別対処
+- [Pro Git 日本語版](https://git-scm.com/book/ja/v2) — Git のエラーの背景を理解したいときに戻る場所

@@ -1,8 +1,248 @@
+---
+# この付録はコードチャンクの書き方を「文字として」示すため、実行エンジンを止めている
+engine: markdown
+---
+
 # チートシート {#sec-cheatsheet}
 
-<!-- TODO
-- よく使う Git コマンド
-- よく使う Quarto コマンド
-- YAML オプションの早見表
-- Markdown 記法の早見表
--->
+よく使う操作と書き方を一覧にしました。意味の説明は本文の各章にあります。ここは「思い出す」ための場所です。
+
+`<>` で囲んだ部分は、自分の値に置き換えてください。
+
+## Git — 日常的に使うもの
+
+| コマンド | 何をするか |
+|---|---|
+| `git status` | いま何が変わっているかを見る |
+| `git add .` | 変更をすべてステージに載せる |
+| `git add <ファイル名>` | 特定のファイルだけ載せる |
+| `git commit -m "<説明>"` | ステージの内容を履歴に刻む |
+| `git push` | 手元のコミットを GitHub に送る |
+| `git pull` | GitHub の変更を手元に取り込む |
+| `git log --oneline -10` | 直近10件の履歴を1行ずつ見る |
+| `git diff` | まだステージに載せていない変更を見る |
+| `git diff --staged` | ステージ済みの変更を見る |
+
+作業の型は `status` → `add` → `commit` → `push` です（@sec-commit-push）。
+
+## Git — 準備と修正
+
+| コマンド | 何をするか |
+|---|---|
+| `git config --global user.name "<名前>"` | 記録に残す名前を設定する |
+| `git config --global user.email "<メール>"` | 記録に残すメールアドレスを設定する |
+| `git config --global init.defaultBranch main` | 最初のブランチ名を `main` にする |
+| `git config --global --list` | 設定を一覧表示する |
+| `git init` | 手元のフォルダをリポジトリにする |
+| `git clone <URL>` | GitHub のリポジトリを手元に複製する |
+| `git remote -v` | 送信先の URL を確認する |
+| `git commit --amend -m "<説明>"` | 直前のコミットの説明を書き直す（push 前のみ） |
+| `git restore <ファイル名>` | そのファイルの変更を捨てて元に戻す |
+| `git rm --cached -r <フォルダ名>` | 追跡をやめる。手元のファイルは残す |
+
+## Git — ブランチ
+
+| コマンド | 何をするか |
+|---|---|
+| `git branch` | ブランチの一覧と現在地を見る |
+| `git switch -c <ブランチ名>` | 新しいブランチを作って移動する |
+| `git switch main` | `main` に戻る |
+| `git merge <ブランチ名>` | そのブランチの変更を現在地に取り込む |
+| `git branch -d <ブランチ名>` | 用済みのブランチを削除する |
+| `git push -u origin <ブランチ名>` | 新しいブランチを GitHub に送る |
+
+詳細は @sec-branch-pr にあります。
+
+## Git — タグとリリース
+
+| コマンド | 何をするか |
+|---|---|
+| `git tag -a v1.0.0 -m "<説明>"` | 注釈付きのタグを打つ |
+| `git tag` | タグの一覧を見る |
+| `git push origin v1.0.0` | タグを GitHub に送る |
+| `git push --tags` | すべてのタグを送る |
+
+版番号は `メジャー.マイナー.パッチ` の順です（@sec-release）。
+
+## Quarto コマンド
+
+| コマンド | 何をするか |
+|---|---|
+| `quarto render` | プロジェクト全体を変換する |
+| `quarto render <ファイル名>` | そのファイルだけ変換する |
+| `quarto preview` | ブラウザで開き、保存のたびに更新する |
+| `quarto preview <ファイル名>` | そのファイルだけプレビューする |
+| `quarto check` | 動作に必要な環境を自己診断する |
+| `quarto --version` | 版を確認する |
+| `quarto render --to pdf` | 出力形式を指定して変換する |
+| `quarto create project book <名前>` | book プロジェクトの雛形を作る |
+
+確認は `preview` ではなく `render` で行ってください。preview は変更のあったページだけを処理することがあります（@sec-publish-troubleshooting）。
+
+## `_quarto.yml` — book の骨組み
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: book
+  output-dir: _site
+
+lang: ja
+
+book:
+  title: "タイトル"
+  author: "著者名"
+  date: today
+  search: true
+  chapters:
+    - index.qmd
+    - part: "第1部"
+      chapters:
+        - chapters/01.qmd
+  appendices:
+    - appendix/a.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    number-sections: true
+```
+
+`type:` を `website` にすると、章番号のない並列のページ群になります（@sec-website）。
+
+## `.qmd` のフロントマター
+
+| 項目 | 意味 |
+|---|---|
+| `title:` | ページの見出し |
+| `subtitle:` | 副題 |
+| `author:` | 著者名 |
+| `date:` | 日付。`today` と書くと変換日が入る |
+| `format:` | 出力形式。`html`、`pdf`、`docx`、`revealjs` など |
+| `toc:` | そのページの目次を出すか |
+| `bibliography:` | 使う `.bib` ファイルのパス |
+| `csl:` | 引用の体裁を決める `.csl` ファイル |
+| `execute:` | コード実行の既定値をまとめて指定する |
+| `draft: true` | 一覧に出さず、公開もしない |
+
+## Markdown 記法
+
+| 書き方 | 表示 |
+|---|---|
+| `# 見出し1` | 最上位の見出し（ページに1つ） |
+| `## 見出し2` | 節の見出し |
+| `**強調**` | 太字 |
+| `*斜体*` | 斜体（日本語では効果が薄い） |
+| `` `コード` `` | 等幅で表示する |
+| `- 項目` | 箇条書き |
+| `1. 項目` | 番号付きの箇条書き |
+| `> 引用` | 引用ブロック |
+| `[表示文字](URL)` | リンク |
+| `![説明](画像パス)` | 画像 |
+| `---` | 区切り線 |
+
+改行を保ったまま次の行に進めたい場合は、行末に半角スペースを2つ置くか、空行を入れて段落を分けます（@sec-qmd-basics）。
+
+## クロスリファレンス
+
+| 対象 | ラベルの接頭辞 | 参照の書き方 |
+|---|---|---|
+| 図 | `fig-` | `@fig-result` |
+| 表 | `tbl-` | `@tbl-summary` |
+| 節・章 | `sec-` | `@sec-methods` |
+| 数式 | `eq-` | `@eq-model` |
+| コード | `lst-` | `@lst-setup` |
+
+図と表は、**キャプションが付いていないと参照できません**。節の参照には `number-sections: true` が必要です（@sec-crossref-math）。
+
+## 数式
+
+| 書き方 | 結果 |
+|---|---|
+| `$x + y$` | 文中に埋め込む |
+| `$$x + y$$` | 独立した行に置く |
+| `$$x + y$$ {#eq-sum}` | 独立した行に置き、番号を付ける |
+
+## 引用文献
+
+| 書き方 | 出力の形 |
+|---|---|
+| `[@smith2020]` | （Smith 2020） |
+| `@smith2020` | Smith (2020) |
+| `[@smith2020; @tanaka2021]` | 複数をまとめて示す |
+| `[-@smith2020]` | 年だけを示す |
+| `[@smith2020, p. 12]` | 該当ページを添える |
+
+文献リストの位置を指定するには、出したい場所に `::: {#refs}` と `:::` で囲んだ空のブロックを置きます（@sec-citations）。
+
+## チャンクオプション
+
+チャンクの1行目から、シャープと縦棒（`#` と `|`）に続けて書きます。
+
+```` markdown
+```{r}
+#| label: fig-scatter
+#| fig-cap: "身長と体重の関係"
+#| echo: false
+
+plot(x, y)
+```
+````
+
+指定できる項目のうち、よく使うものは次のとおりです。
+
+| オプション | 意味 |
+|---|---|
+| `echo: false` | コードを表示しない。結果だけ出す |
+| `eval: false` | 実行しない。コードの表示だけ |
+| `include: false` | 実行するが、コードも結果も出さない |
+| `warning: false` | 警告を出力に含めない |
+| `message: false` | メッセージを出力に含めない |
+| `label: fig-xxx` | 図にラベルを付ける |
+| `fig-cap: "説明"` | 図のキャプション |
+| `fig-width: 7` | 図の幅（インチ） |
+| `tbl-cap: "説明"` | 表のキャプション |
+| `code-fold: true` | コードを折りたたんで表示する |
+
+プロジェクト全体の既定値は `_quarto.yml` の `execute:` にまとめて書けます（@sec-code-execution）。
+
+## callout
+
+```` markdown
+::: {.callout-note}
+## 見出し
+
+本文。
+:::
+````
+
+`note`（補足）、`tip`（助言）、`warning`（注意）、`important`（重要）、`caution`（危険）の5種類があります。`## 見出し` は省略できます（@sec-qmd-basics）。
+
+## `.gitignore` の書き方
+
+| 書き方 | 意味 |
+|---|---|
+| `_site/` | どの階層にあっても除外する |
+| `/_site/` | 一番上の階層のものだけ除外する |
+| `*.key` | 拡張子で除外する |
+| `data/` | フォルダの中身をすべて除外する |
+| `!data/README.md` | 除外の例外を作る |
+
+Quarto プロジェクトの最低限は `/_site/` と `/.quarto/` の2行です（@sec-gitignore）。
+
+## キーボード操作
+
+| 操作 | Windows / Linux | macOS |
+|---|---|---|
+| VS Code でプレビュー | `Ctrl` + `Shift` + `K` | `Command` + `Shift` + `K` |
+| ブラウザの強制再読み込み | `Ctrl` + `Shift` + `R` | `Command` + `Shift` + `R` |
+| 開発者ツールを開く | `F12` | `Option` + `Command` + `I` |
+| ターミナルの実行を中断 | `Ctrl` + `C` | `Control` + `C` |
+
+## 参考リンク
+
+- [Quarto: Markdown Basics](https://quarto.org/docs/authoring/markdown-basics.html) — 本文の記法の公式一覧。ここに載せなかった脚注や表もある
+- [Quarto: HTML Options](https://quarto.org/docs/reference/formats/html.html) — HTML 出力で指定できる YAML 項目の全一覧
+- [Quarto: Code Cells — knitr](https://quarto.org/docs/reference/cells/cells-knitr.html) — チャンクオプションの全一覧
+- [git-commit 公式リファレンス](https://git-scm.com/docs/git-commit) — オプションの正確な仕様。他のコマンドも同じ形式で引ける
+- [Pro Git 日本語版](https://git-scm.com/book/ja/v2) — コマンドの背景にある考え方を確認したいときに
