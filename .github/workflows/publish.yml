@@ -1,0 +1,87 @@
+name: Publish
+
+# main ブランチに push されるたびに、教材とスライドをビルドして
+# GitHub Pages へ公開する。手動実行もできるようにしておく。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# GitHub Pages へのデプロイに必要な権限。
+# contents: read だけを与え、書き込み権限は渡さない。
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 公開処理が重ならないようにする。連続で push しても、
+# 走っている公開処理は中断せず、順番に実行する。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ビルド
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Quarto をインストール
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          # 手元と同じバージョンに固定する。固定しておかないと、
+          # Quarto の更新だけでビルド結果が変わることがある。
+          version: 1.9.36
+
+      # --- R / Python -------------------------------------------------------
+      # 本文でコード実行を扱うようになったら、以下を有効にする。
+      # ただし _freeze/ をコミットしておけば、実行結果は再利用されるため
+      # 多くの場合これらは不要（execute: freeze: auto を設定済み）。
+      #
+      # - name: R をインストール
+      #   uses: r-lib/actions/setup-r@v2
+      #   with:
+      #     use-public-rspm: true
+      #
+      # - name: R パッケージを復元
+      #   uses: r-lib/actions/setup-renv@v2
+      #
+      # - name: Python をインストール
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12"
+      #
+      # - name: Python パッケージをインストール
+      #   run: pip install -r requirements.txt
+
+      - name: 教材本体をレンダリング
+        run: quarto render
+
+      # スライドは slides/ にある独立した Quarto プロジェクト。
+      # 教材本体より後にビルドし、出力を _site/slides/ へ移す。
+      # slides/_quarto.yml がまだ無い間は、このステップは飛ばされる。
+      - name: スライドをレンダリング
+        if: hashFiles('slides/_quarto.yml') != ''
+        run: |
+          quarto render slides
+          mkdir -p _site/slides
+          cp -r slides/_site/. _site/slides/
+
+      - name: 成果物をアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: 公開
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages へデプロイ
+        id: deployment
+        uses: actions/deploy-pages@v4
