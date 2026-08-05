@@ -1,0 +1,50 @@
+---
+title: "研究者のための Quarto ガイド"
+subtitle: "書く・管理する・公開する"
+author: "Maple"
+date: today
+date-format: "YYYY年M月D日"
+---
+
+## なぜ必要か
+
+<!-- TODO
+- 散らかる / 消える / 共有できない / 再現できない の4つを具体例で
+- 聴衆に心当たりのある失敗談から入る
+-->
+
+## 全体像
+
+<!-- TODO
+- 手元 → GitHub → 公開サイト の流れを1枚の図で
+- 何をどこに置くか
+-->
+
+## 書く — Quarto
+
+<!-- TODO
+- Markdown + コード実行 + 多形式出力
+- 同じ原稿から論文・スライド・Web サイトが作れる
+-->
+
+## 公開する — GitHub Pages
+
+<!-- TODO
+- push すると自動でビルドされて公開される
+- 無料・独自ドメインも使える
+-->
+
+## 限定公開する — Cloudflare
+
+<!-- TODO
+- GitHub Pages では認証をかけられない
+- Cloudflare Workers + Access で研究室内部に限定する
+-->
+
+## テンプレートから始める
+
+<!-- TODO
+- 個人サイト / 研究室マニュアル / 研究ブログ
+- Use this template ボタンから始められる
+- 教材本体の URL を案内して終わる
+-->

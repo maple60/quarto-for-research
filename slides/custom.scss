@@ -1,0 +1,63 @@
+/*-- scss:defaults --*/
+
+// 教材本体（assets/custom.scss）と同じ考え方で、Web フォントは使わず
+// OS に入っているフォントを順に試す。発表会場のネットワークに依存しない。
+$font-family-sans-serif:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Hiragino Sans",
+  "Hiragino Kaku Gothic ProN",
+  "Noto Sans JP",
+  "BIZ UDPGothic",
+  "Yu Gothic UI",
+  "Yu Gothic",
+  Meiryo,
+  "Segoe UI",
+  Roboto,
+  sans-serif !default;
+
+$font-family-monospace:
+  "SFMono-Regular",
+  Menlo,
+  Consolas,
+  "BIZ UDGothic",
+  "MS Gothic",
+  monospace !default;
+
+// 後ろの席から読める大きさ。既定より少し大きくしている。
+$presentation-font-size-root: 36px !default;
+$presentation-h1-font-size: 1.9em !default;
+$presentation-h2-font-size: 1.4em !default;
+$presentation-line-height: 1.5 !default;
+
+$body-color: #1f2328 !default;
+$link-color: #0b6bcb !default;
+
+
+/*-- scss:rules --*/
+
+// 日本語の禁則処理。行頭に句読点や閉じ括弧が来ないようにする。
+.reveal {
+  line-break: strict;
+}
+
+// 見出しは字送りを詰める（"palt" は日本語フォントのプロポーショナル字形）。
+.reveal h1,
+.reveal h2,
+.reveal h3 {
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.02em;
+}
+
+// スライドの箇条書きは行間を広めに取る。
+.reveal ul,
+.reveal ol {
+  line-height: 1.7;
+}
+
+// コードは本文より小さくしないと1画面に収まらない。
+.reveal pre code {
+  font-size: 0.75em;
+  line-height: 1.4;
+  max-height: 60vh;
+}

@@ -1,0 +1,22 @@
+project:
+  type: default
+  output-dir: _site
+
+lang: ja
+
+format:
+  revealjs:
+    theme:
+      - default
+      - custom.scss
+    slide-number: c/t
+    show-slide-number: all
+    progress: true
+    history: false
+    center: false
+    incremental: false
+    # 発表中に F キーで全画面、S キーで発表者ノートが開く
+    chalkboard: false
+    # 右下のメニューから PDF 書き出しやスライド一覧を開ける
+    menu:
+      side: right
