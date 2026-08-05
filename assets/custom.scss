@@ -25,8 +25,13 @@ $font-family-monospace:
   "MS Gothic",
   monospace !default;
 
+// Quarto のデフォルトは 17px。日本語は字面が大きいので、
+// ブラウザ標準の 16px に戻したほうが本文の圧が下がる。
+$font-size-root: 16px !default;
+
 // 日本語は英文より行間を広めに取ったほうが読みやすい。
-$line-height-base: 1.85 !default;
+// ただし広げすぎると間延びするので 1.75 程度に抑える。
+$line-height-base: 1.75 !default;
 
 $body-color: #1f2328 !default;
 $link-color: #0b6bcb !default;
