@@ -1,9 +1,231 @@
 # 30分で1ページ公開する {#sec-quickstart}
 
-<!-- TODO
-- GitHub アカウントを作り、リポジトリを1つ作る
-- `index.qmd` を用意する（最小限の内容）
-- GitHub Actions の設定ファイルを置く
-- GitHub Pages を有効にし、公開 URL を確認する
-- よくある失敗 — 反映されない、404 になる
--->
+この章では、自分の Web ページをインターネットに公開します。仕組みの説明はしません。まず動くものを作り、何が起きていたのかは次の @sec-quickstart-explained で振り返ります。
+
+先に完成形を示します。作業を終えると、次のような URL で誰でも見られるページができます。
+
+```
+https://<あなたのユーザー名>.github.io/quarto-quickstart/
+```
+
+`<あなたのユーザー名>` は、これから作る GitHub のアカウント名に置き換わります。この教材では、山括弧で囲んだ部分を「あなた自身の値に置き換える場所」として使います。
+
+::: {.callout-note}
+## 始める前に必要なもの
+
+- Git と Quarto がインストールされていること（@sec-setup）
+- メールアドレスが1つ
+- テキストエディタ（この教材では VS Code を想定します）
+:::
+
+## 1. GitHub のアカウントを作る
+
+[github.com](https://github.com/) を開き、右上の **Sign up** からアカウントを作ります。メールアドレス、パスワード、ユーザー名を入力し、メールに届いた確認コードを入力すれば完了します。
+
+ユーザー名は公開 URL の一部になり、あとから変えるとリンクがすべて切れます。研究者として長く使うなら、姓と名を組み合わせたものや、普段使っているハンドルネームなど、数年後にも名乗れる名前にしてください。
+
+## 2. リポジトリを作る
+
+リポジトリ（プロジェクト1つ分の保管場所）を作ります。画面右上の **+** から **New repository** を選び、次のように設定します。
+
+- **Repository name**: `quarto-quickstart`
+- **Public** を選ぶ
+- **Add a README file** にチェックを入れる
+
+**Public** は必須です。GitHub Pages（GitHub が提供する Web サイト公開機能）は、無料プランでは公開リポジトリでしか使えません。この時点では練習用の中身のないページなので、公開して困るものはありません。
+
+**Add a README file** にチェックを入れるのは、リポジトリを空でない状態にするためです。空のリポジトリは扱いに癖があり、最初の一歩で余計な警告に出会います。
+
+入力できたら **Create repository** を押します。
+
+## 3. 公開の設定を先に済ませる
+
+リポジトリの上部にある **Settings** を開き、左側のメニューから **Pages** を選びます。**Build and deployment** の **Source** が **Deploy from a branch** になっているので、これを **GitHub Actions** に変更します。
+
+この設定を先に済ませる理由は、あとから変更すると最初の公開処理が失敗するためです。設定しないまま次に進むと「公開先が設定されていない」というエラーで止まり、原因の分かりにくい失敗の仕方をします。
+
+保存ボタンはありません。選んだ時点で反映されます。
+
+## 4. 手元にコピーする
+
+ここからは自分のパソコンでの作業です。ターミナル（文字だけでパソコンに命令する画面。Windows なら PowerShell、macOS なら Terminal）を開き、次を実行します。
+
+```bash
+git clone https://github.com/<あなたのユーザー名>/quarto-quickstart.git
+```
+
+これで、GitHub 上のリポジトリが手元のフォルダとしてコピーされます。続けて、そのフォルダに移動します。
+
+```bash
+cd quarto-quickstart
+```
+
+以降のコマンドは、すべてこのフォルダの中で実行します。
+
+## 5. ページを書く
+
+VS Code でこのフォルダを開きます。ターミナルで次を実行すると開きます。
+
+```bash
+code .
+```
+
+ファイルを2つ作ります。1つ目は `_quarto.yml` です。サイト全体の設定を書くファイルで、この名前でなければなりません。
+
+```{.yaml filename="_quarto.yml"}
+project:
+  type: website
+  output-dir: _site
+
+lang: ja
+
+website:
+  title: "はじめてのページ"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+```
+
+上から順に、「Web サイトを作る」「出来上がったファイルは `_site` フォルダに入れる」「日本語のサイトである」「サイト名は『はじめてのページ』」「HTML を cosmo というデザインで作り、目次を付ける」という意味です。
+
+2つ目は `index.qmd` です。`index` という名前は「そのフォルダを開いたときに最初に表示されるページ」を意味する決まりごとで、これも名前を変えられません。
+
+```{.markdown filename="index.qmd"}
+---
+title: "自己紹介"
+---
+
+## これは何か
+
+Quarto で書いた最初のページです。
+
+## できること
+
+- 見出しと箇条書きが書ける
+- **強調** や `コード` が書ける
+- [リンク](https://quarto.org/) が張れる
+```
+
+書けたら、手元で見た目を確認します。
+
+```bash
+quarto preview
+```
+
+ブラウザが開き、作ったページが表示されます。この状態で `index.qmd` を書き換えて保存すると、ブラウザの表示がすぐに更新されます。文章を足したり消したりして、反応を確かめてください。
+
+確認が済んだら、ターミナルで `Ctrl` + `C` を押して終了します。
+
+## 6. 自動公開の設定を置く
+
+`.github/workflows/publish.yml` というファイルを作ります。VS Code の新規ファイル作成で、この文字列をそのまま名前として入力すれば、途中のフォルダも一緒に作られます。先頭のピリオドを忘れないでください。
+
+```{.yaml filename=".github/workflows/publish.yml"}
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - run: quarto render
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+```
+
+このファイルは「GitHub に新しい内容が送られてきたら、GitHub の用意したコンピュータで Quarto を動かし、出来上がった `_site` を公開先に置く」という指示書です。内容は @sec-github-actions で1行ずつ読み解きます。今は写すだけで構いません。
+
+YAML という形式は行頭の空白の数に意味があります。**空白の数を変えないよう、そのまま貼り付けてください。**
+
+## 7. GitHub に送る
+
+3つのファイルができました。これを GitHub に送ります。
+
+```bash
+git add .
+```
+
+```bash
+git commit -m "最初のページを作成"
+```
+
+```bash
+git push
+```
+
+`git push` を実行すると、ブラウザが開いて GitHub へのログインを求められることがあります。画面の指示に従って許可してください。1回許可すれば、次からは聞かれません。
+
+送信できたら、ブラウザで自分のリポジトリを開き、上部の **Actions** タブを見てください。黄色い丸が回っていれば処理中、緑のチェックが付けば成功です。1分ほどで終わります。
+
+緑になったら、次の URL を開きます。
+
+```
+https://<あなたのユーザー名>.github.io/quarto-quickstart/
+```
+
+自分の書いたページが表示されれば完了です。この URL は誰でも開けます。手元のパソコンの電源を切っても表示され続けます。
+
+これ以降、`index.qmd` を書き換えて `git add .` → `git commit` → `git push` を実行するたびに、公開されているページが自動で更新されます。
+
+## よくある失敗
+
+**`git commit` で `Please tell me who you are` と出る**
+
+Git に名前とメールアドレスを教えていない状態です。次の2つを実行してから、もう一度 `git commit` してください。@sec-setup でも触れています。
+
+```bash
+git config --global user.name "<あなたの名前>"
+```
+
+```bash
+git config --global user.email "<あなたのメールアドレス>"
+```
+
+**Actions が赤いバツになる**
+
+多くは YAML のインデント（行頭の空白）のずれです。**Actions** タブで赤いバツをクリックすると、どの行で失敗したかが表示されます。`publish.yml` を貼り直すのが確実です。
+
+**ページが 404 になる**
+
+3つの原因が考えられます。上から順に確認してください。
+
+1. 手順3の **Source** が **GitHub Actions** になっていない
+2. Actions がまだ動いている、または失敗している
+3. URL の末尾のスラッシュが抜けている（`/quarto-quickstart` ではなく `/quarto-quickstart/`）
+
+公開直後は URL が有効になるまで数十秒かかることがあります。Actions が緑になった直後に 404 が出た場合は、1分ほど待ってから再読み込みしてください。
+
+**書き換えたのに公開ページが変わらない**
+
+`git push` を忘れているか、ブラウザが古い表示を覚えています。まず GitHub 上でファイルが更新されているか確認し、更新されていれば `Ctrl` + `Shift` + `R`（macOS では `Command` + `Shift` + `R`）で再読み込みしてください。
+
+**リポジトリを Private で作ってしまった**
+
+**Settings** の一番下にある **Change repository visibility** から Public に変更できます。無料プランでは Private のままでは公開できません。
