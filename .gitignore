@@ -1,0 +1,50 @@
+# ---- Quarto ----------------------------------------------------------------
+# ビルドの中間ファイルと出力。出力は GitHub Actions が生成するので追跡しない。
+/.quarto/
+/_site/
+/_book/
+/slides/.quarto/
+/slides/_site/
+*_files/
+*_cache/
+
+# _freeze/ は「コード実行結果のキャッシュ」で、あえて追跡する。
+# これがあると CI で R / Python を動かさずにビルドできる。
+!/_freeze/
+
+# ---- R ---------------------------------------------------------------------
+.Rproj.user/
+.Rhistory
+.Rhistory.*
+.RData
+.Ruserdata
+.Renviron
+renv/library/
+renv/local/
+renv/staging/
+
+# ---- Python ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+.python-version
+.pytest_cache/
+*.egg-info/
+
+# ---- OS / エディタ ---------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ---- 認証情報（絶対に追跡しない）------------------------------------------
+.env
+.env.*
+*.pem
+*.key
+
+**/*.quarto_ipynb

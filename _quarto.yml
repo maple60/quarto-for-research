@@ -1,0 +1,49 @@
+project:
+  type: book
+  output-dir: _site
+
+# サイト全体の言語。目次・検索・「次のページ」などの UI 文言が日本語になる。
+lang: ja
+
+book:
+  title: "研究者のための Quarto ガイド"
+  subtitle: "書く・管理する・公開する"
+  author: "Maple"
+  date: today
+  date-format: "YYYY年M月D日"
+  search: true
+  page-navigation: true
+  sidebar:
+    style: docked
+    collapse-level: 1
+    search: true
+  # 各ページに「編集する」「問題を報告する」リンクを出す
+  repo-url: https://github.com/maple60/quarto-for-research
+  repo-branch: main
+  repo-actions: [edit, issue]
+  chapters:
+    - index.qmd
+
+format:
+  html:
+    theme:
+      - cosmo
+      - assets/custom.scss
+    toc: true
+    toc-depth: 3
+    toc-title: "このページの内容"
+    number-sections: true
+    number-depth: 2
+    code-copy: true
+    code-overflow: wrap
+    code-link: false
+    link-external-newwindow: true
+    link-external-icon: true
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    smooth-scroll: true
+
+# コード実行結果をキャッシュする。_freeze/ をコミットしておけば、
+# GitHub Actions 側で R / Python を動かさずにビルドできる。
+execute:
+  freeze: auto

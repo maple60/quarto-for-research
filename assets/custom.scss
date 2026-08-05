@@ -1,0 +1,82 @@
+/*-- scss:defaults --*/
+
+// 日本語を含む本文用のフォントスタック。
+// Web フォントは読み込まず、各 OS に入っているフォントを順に試す。
+// 外部への通信が発生しないので、表示が速く、閲覧者の追跡もされない。
+$font-family-sans-serif:
+  -apple-system,
+  BlinkMacSystemFont,
+  "Hiragino Sans",
+  "Hiragino Kaku Gothic ProN",
+  "Noto Sans JP",
+  "BIZ UDPGothic",
+  "Yu Gothic UI",
+  "Yu Gothic",
+  Meiryo,
+  "Segoe UI",
+  Roboto,
+  sans-serif !default;
+
+$font-family-monospace:
+  "SFMono-Regular",
+  Menlo,
+  Consolas,
+  "BIZ UDGothic",
+  "MS Gothic",
+  monospace !default;
+
+// 日本語は英文より行間を広めに取ったほうが読みやすい。
+$line-height-base: 1.85 !default;
+
+$body-color: #1f2328 !default;
+$link-color: #0b6bcb !default;
+
+
+/*-- scss:rules --*/
+
+// 日本語の禁則処理を厳格にする（行頭に句読点や閉じ括弧が来ないようにする）。
+body {
+  line-break: strict;
+  overflow-wrap: break-word;
+}
+
+// 段落間を少し空けて、長い日本語文章の塊をほぐす。
+p {
+  margin-bottom: 1.1em;
+}
+
+// 見出しは字送りを詰めたほうが締まって見える（"palt" は日本語フォントの
+// プロポーショナル字形を有効にする指定）。
+h1, h2, h3, h4, .sidebar-title, .navbar-brand {
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.02em;
+}
+
+h2 {
+  margin-top: 2.2rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+// コードは日本語より少し小さくしないと本文とのバランスが崩れる。
+code, pre {
+  font-size: 0.9em;
+  line-break: auto;
+}
+
+// 本文中のインラインコードを目立たせる。
+code:not(.sourceCode):not(pre code) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+// callout（注意書き）の見出しも日本語を詰める。
+.callout .callout-title-container {
+  font-feature-settings: "palt" 1;
+}
+
+// サイドバー目次が長くなるので、行間を詰めて一覧性を上げる。
+.sidebar-item {
+  line-height: 1.5;
+}
