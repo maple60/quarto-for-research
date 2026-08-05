@@ -1,9 +1,250 @@
 # Cloudflare Access の設定 {#sec-cloudflare-access}
 
-<!-- TODO
-- アカウント作成とドメインの追加
-- Cloudflare Workers へのデプロイ
-- Access アプリケーションとポリシーの作成
-- 動作確認（別ブラウザ・シークレットウィンドウで確かめる）
-- スクリーンショットの配置
--->
+この章で、限定公開のサイトを実際に立ち上げます。研究室マニュアルを `manual.example.com` で公開し、許可した人だけが読める状態にする、という想定で進めます。
+
+手順は5段階です。
+
+1. Cloudflare にドメインを預ける
+2. サイトを Cloudflare に置く（Workers）
+3. 独自ドメインで開けるようにする
+4. Access で門番を立てる
+5. 自動デプロイに切り替える
+
+4まで終われば限定公開は完成します。5は、以後の更新を楽にするための仕上げです。
+
+## 準備するもの
+
+- **独自ドメイン。** 取得方法は @sec-custom-domain を参照してください
+- **ビルド済みのサイト。** 手元で `quarto render` が通り、`_site/` ができている状態
+- **Node.js。** Cloudflare へのアップロードに使う `wrangler` というコマンドが Node.js 上で動きます
+
+Node.js を入れていない場合は、[公式サイト](https://nodejs.org/ja)から LTS 版をダウンロードして、指示どおりインストールしてください。ターミナルを開き直してから、入ったことを確認します。
+
+```bash
+node --version
+```
+
+`v22.x.x` のようにバージョンが表示されれば大丈夫です。
+
+## 1. ドメインを Cloudflare に預ける
+
+[Cloudflare のサインアップページ](https://dash.cloudflare.com/sign-up)でアカウントを作ります。無料プランで構いません。
+
+ログインしたら、左のメニューから **Account Home** を開き、**Add a domain** を選びます。取得済みのドメイン（例: `example.com`）を入力し、**Free** プランを選んで進めてください。
+
+Cloudflare が既存の DNS レコードを読み取って一覧を表示します。**ここは必ず目視で確認してください。** 特にメールを受け取っている場合、MX レコードが漏れているとメールが止まります。足りないものがあれば、この画面で追加できます。
+
+次の画面で、2つのネームサーバ名（`xxx.ns.cloudflare.com` のような文字列）が示されます。これをドメインを買った業者（レジストラ）の管理画面で設定します。「ネームサーバー設定」「DNS設定」といった項目から、既存の値を消して Cloudflare のものに置き換えてください。
+
+反映されると Cloudflare から通知が届きます。**通常は数分から数時間、最大で48時間**かかります。この待ち時間のあいだに、次の手順を進められます。
+
+## 2. サイトを Cloudflare に置く
+
+リポジトリの一番上に `wrangler.jsonc` というファイルを作ります。Cloudflare へのアップロード設定を書くファイルです。
+
+```{.json filename="wrangler.jsonc"}
+{
+  "name": "lab-manual",
+  "compatibility_date": "2026-08-06",
+  "assets": {
+    "directory": "./_site"
+  },
+  "workers_dev": false
+}
+```
+
+4行の意味は次のとおりです。
+
+- `name` — Cloudflare 上での識別名。英小文字・数字・ハイフンのみ。URL の一部にも使われます
+- `compatibility_date` — 動作の基準日。**作業した日付**を書きます。以後は変えません
+- `assets.directory` — アップロードするフォルダ。Quarto の `output-dir` と揃えます
+- `workers_dev` — 後述します。**`false` にしてください**
+
+::: {.callout-important}
+## `workers_dev` を `false` にする理由
+
+既定では、`https://lab-manual.<アカウント名>.workers.dev` という URL が自動で発行されます。この URL には Access をかけられないため、**独自ドメイン側に鍵をかけても、こちらから素通しで読めてしまいます。**
+
+@sec-cloudflare-overview で述べた「裏口」と同じ状況です。限定公開のサイトでは、必ず `false` にしてください。
+:::
+
+設定を書いたら、アップロードします。
+
+```bash
+npx wrangler deploy
+```
+
+初回はブラウザが開き、Cloudflare へのログインと権限の確認を求められます。許可すると、`_site/` の中身がアップロードされます。
+
+## 3. 独自ドメインで開けるようにする
+
+`wrangler.jsonc` に、使うホスト名を書き足します。
+
+```{.json filename="wrangler.jsonc"}
+{
+  "name": "lab-manual",
+  "compatibility_date": "2026-08-06",
+  "assets": {
+    "directory": "./_site"
+  },
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "manual.example.com", "custom_domain": true }
+  ]
+}
+```
+
+`pattern` は自分のホスト名に置き換えてください。`custom_domain: true` を付けると、必要な DNS レコードと証明書を Cloudflare が自動で用意します。手動で DNS を設定する必要はありません。
+
+もう一度アップロードします。
+
+```bash
+npx wrangler deploy
+```
+
+`https://manual.example.com` を開いて、サイトが表示されれば成功です。**この時点では、まだ誰でも読める状態です。** 鍵は次の手順でかけます。
+
+::: {.callout-note}
+## ドメインの反映がまだのとき
+
+手順1のネームサーバ変更が反映されていないと、`custom_domain` の設定でエラーになります。Cloudflare の管理画面でドメインが **Active** と表示されるまで待ってから、もう一度実行してください。
+:::
+
+## 4. Access で門番を立てる
+
+Cloudflare の管理画面で、左メニューの **Zero Trust** を開きます。初回はチーム名（team name）を決める画面が出ます。これは `<チーム名>.cloudflareaccess.com` というログイン画面の URL に使われるもので、研究室名などで構いません。**後から変えられないので、少し考えて決めてください。** 続いて表示されるプラン選択では **Free** を選びます。
+
+次に、アプリケーションを登録します。**Access controls** → **Applications** → **Create new application** と進み、**Self-hosted and private** を選んで **Add public hostname** に進みます。
+
+主な入力項目は次のとおりです。
+
+- **Application name** — 管理用の名前。「研究室マニュアル」など、自分が分かるもので構いません
+- **Session duration** — 一度ログインした人が、再ログインなしで読める期間。既定は24時間です。内部向けの資料なら、1週間程度に延ばしても実害は少ないでしょう
+- **Domain** — 保護するホスト名。ドロップダウンから `example.com` を選び、サブドメイン欄に `manual` と入力します
+- **Path** — 空欄のままにします。サイト全体が対象になります（一部だけ守る方法は @sec-private-patterns で扱います）
+
+続いてポリシー（誰を通すか）を作ります。**Add a policy** から新規作成し、次のように設定します。
+
+- **Policy name** — `lab-members` など
+- **Action** — **Allow**
+- **Include** — セレクタに **Emails** を選び、通したい人のメールアドレスを列挙する
+
+まずは**自分のメールアドレスだけ**を入れて作成してください。動作を確認してから増やすほうが安全です。
+
+::: {.callout-warning}
+## ポリシーを作らないと誰も入れない
+
+Access は「許可されていなければ拒否」で動きます。ポリシーを1つも作らないと、自分自身も締め出されます。
+
+逆に言えば、**設定を間違えたときに漏れるのではなく、入れなくなる**方向に倒れます。安心して試して構いません。
+:::
+
+最後に認証方法を選びます。既定では Cloudflare 自身の認証（Cloudflare アカウントでのログイン）が有効になっています。読者にアカウントを作らせたくない場合は、メールに番号が届く方式などに変更します。選び方は @sec-auth-methods で扱います。
+
+**Create** を押せば設定は完了です。
+
+## 動作を確認する
+
+**必ずシークレットウィンドウ（プライベートウィンドウ）で確認してください。** 普段のウィンドウでは、すでにログイン済みの状態が残っていて、鍵がかかっているかどうか判断できません。
+
+1. シークレットウィンドウで `https://manual.example.com` を開く
+2. Cloudflare のログイン画面に切り替わることを確認する
+3. 許可したメールアドレスでログインし、サイトが表示されることを確認する
+4. ウィンドウを閉じ、**許可していないアドレスでも試す。** 拒否されれば正しく動いています
+
+4を省略しないでください。「入れること」の確認だけでは、**入れないことの確認**になりません。
+
+`https://lab-manual.<アカウント名>.workers.dev` が開けないことも、あわせて確認しておくと確実です。
+
+## 5. 自動デプロイに切り替える
+
+ここまでは手元から `npx wrangler deploy` を叩いていました。第4部と同じように、push したら自動で更新されるようにします。
+
+まず、GitHub から Cloudflare を操作するための鍵を作ります。Cloudflare の管理画面右上のアイコンから **Profile** → **API Tokens** → **Create Token** と進み、テンプレートの一覧から **Edit Cloudflare Workers** を選んで **Use template** を押します。対象アカウントを自分のアカウントに絞り、要約画面で作成すると、トークン文字列が一度だけ表示されます。**この画面を離れると二度と見られません。** コピーしておいてください。
+
+アカウント ID も必要です。Cloudflare の管理画面でドメインを開くと、右側の **API** 欄に **Account ID** が表示されています。
+
+この2つを GitHub に登録します。リポジトリの **Settings** → **Secrets and variables** → **Actions** → **New repository secret** で、次の2件を追加してください。
+
+- `CLOUDFLARE_API_TOKEN` — 作成したトークン
+- `CLOUDFLARE_ACCOUNT_ID` — アカウント ID
+
+::: {.callout-important}
+## トークンをリポジトリに書かない
+
+トークンは、あなたのアカウントに Worker を配置できる権限そのものです。`.qmd` やワークフローファイルに直接書くと、リポジトリを見た人が使えてしまいます。private リポジトリでも同じです（@sec-gitignore）。
+
+必ず Secrets に登録し、ワークフローからは `${{ secrets.名前 }}` の形で参照してください。
+:::
+
+ワークフローを追加します。
+
+```{.yaml filename=".github/workflows/deploy-private.yml"}
+name: Deploy (private)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.36
+
+      - run: quarto render
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
+
+前半は第4部のワークフロー（@sec-github-actions）とまったく同じです。**最後のステップだけが違います。** GitHub Pages に配置する代わりに、`wrangler` が `_site/` を Cloudflare へ送ります。設定は `wrangler.jsonc` から読まれるので、ここに書くことはありません。
+
+Quarto のバージョンは、手元の `quarto --version` に合わせてください。
+
+これを push すれば、以後は原稿を更新するたびにサイトが更新されます。Access の設定は Cloudflare 側に保存されているので、デプロイのたびに鍵が外れることはありません。
+
+## よくある失敗
+
+**`npx wrangler deploy` で `Authentication error` と出る**
+
+ログイン情報が古いか、別アカウントのものです。`npx wrangler logout` を実行してから、もう一度 `npx wrangler deploy` を試してください。
+
+**`_site/` が見つからない、または中身が古い**
+
+`quarto render` を実行していません。`wrangler` はビルドをしません。**手元にあるファイルをそのまま送るだけ**です。
+
+**独自ドメインを設定するとエラーになる**
+
+ドメインが Cloudflare 上で **Active** になっていない可能性が高いです。ネームサーバの反映を待ってください。また、`custom_domain` を使うホスト名に、別の DNS レコードがすでに存在しているとエラーになります。その場合は先に既存のレコードを削除します。
+
+**ログイン画面が出ずにサイトが見えてしまう**
+
+3つ確認してください。ポリシーの **Domain** が実際のホスト名と一致しているか、`workers_dev` が `false` か、そして**シークレットウィンドウで試しているか**。普段のウィンドウでは、すでに認証を通ったあとの状態が残っています。
+
+**自分も入れなくなった**
+
+ポリシーの **Include** に自分のアドレスが入っていないか、綴りが違います。設定は Cloudflare の管理画面から変更できます。管理画面自体は Access の対象外なので、締め出されることはありません。
+
+**Actions は成功するのにサイトが変わらない**
+
+ブラウザのキャッシュか、Cloudflare 側のキャッシュです。まずシークレットウィンドウで開き直してください。それでも古いままなら、Cloudflare の管理画面で **Caching** → **Configuration** → **Purge Everything** を実行します。
+
+**`Missing entry-point` のようなエラーが出る**
+
+`wrangler.jsonc` の `assets.directory` の綴りを確認してください。この指定がないと、`wrangler` はプログラムを配置しようとして入口を探します。
+
+## 参考リンク
+
+- [Cloudflare Docs: サイトを追加する](https://developers.cloudflare.com/fundamentals/manage-domains/add-site/) — ネームサーバ変更の手順と、既存レコードの引き継ぎ
+- [Cloudflare Docs: Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/) — `assets` の設定項目と配信の仕組み
+- [Cloudflare Docs: Wrangler の設定](https://developers.cloudflare.com/workers/wrangler/configuration/) — `wrangler.jsonc` に書ける項目の網羅的な一覧
+- [Cloudflare Docs: Self-hosted アプリケーションの追加](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/) — Access アプリケーション作成画面の各項目の説明
+- [Cloudflare Docs: GitHub Actions からのデプロイ](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) — `wrangler-action` の使い方と、API トークンの扱いに関する注意

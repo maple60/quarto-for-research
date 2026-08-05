@@ -1,8 +1,114 @@
 # Cloudflare の役割 {#sec-cloudflare-overview}
 
-<!-- TODO
-- CDN・DNS・Zero Trust の位置づけ
-- Cloudflare Pages と Workers の違い
-- GitHub Pages との使い分け（公開は Pages、限定公開は Cloudflare）
-- 無料枠でどこまでできるか
--->
+Cloudflare は、**Web サイトの手前に立つ会社**です。読者とサイトのあいだに割り込み、通信を中継しながら、速くしたり、守ったり、通す相手を選んだりします。
+
+この章では、Cloudflare のどの機能を、なぜ使うのかを整理します。設定の手順は次章（@sec-cloudflare-access）で扱います。
+
+## 3つの顔
+
+Cloudflare の機能は膨大ですが、このガイドで関係するのは3つだけです。
+
+**DNS（住所録）。** ドメイン名とサーバを結びつける仕組みです（@sec-custom-domain）。Cloudflare にドメインを預けると、この住所録を Cloudflare が管理します。
+
+**リバースプロキシと CDN（中継と配達）。** 読者からのリクエストを Cloudflare がいったん受け取り、代わりにサイトへ取りに行って返します。世界中に配置された拠点が写しを持つので、遠くの読者にも速く届きます。
+
+**Zero Trust（門番）。** 中継の途中で「この人を通してよいか」を判断します。この中の **Cloudflare Access** が、@sec-why-private で言った門番です。
+
+3つ目が本題ですが、**1つ目と2つ目が前提になっています。** 通信が Cloudflare を通らなければ、判断する場所がないからです。
+
+## なぜ GitHub Pages のままでは守れないのか
+
+「GitHub Pages のサイトを Cloudflare 経由にして、Access をかければよいのでは」と考えたくなります。ここが第5部で最も間違えやすい点です。
+
+Cloudflare をドメインの手前に置いても、**サイトの実体は `<ユーザー名>.github.io` に残ったまま**です。そして、その URL は誰でも直接開けます。
+
+```
+読者 → example.com → Cloudflare（門番） → GitHub Pages
+                                              ↑
+                        誰でも .github.io へ直接アクセスできる
+```
+
+玄関に鍵をかけても、裏口が開いたままの状態です。しかも裏口の住所（`github.io` の URL）は、リポジトリを見れば分かります。
+
+つまり、限定公開にしたいサイトは、**中身そのものを Cloudflare 側に置く必要があります。** GitHub Pages に置いたままでは、どう設定しても守れません。
+
+## サイトを Cloudflare に置く — Workers
+
+Cloudflare で静的サイトを配信する仕組みが **Workers** です。ビルド済みの `_site/` をそのままアップロードすると、Cloudflare の拠点から配信されます。役割としては GitHub Pages と同じです。
+
+::: {.callout-note}
+## Cloudflare Pages との関係
+
+Cloudflare には **Pages** という似た名前のサービスもあり、解説記事の多くはこちらを使っています。名前も紛らわしいのですが、GitHub Pages とは無関係の別サービスです。
+
+現在、Cloudflare は**新規のプロジェクトには Workers を使うことを推奨**しています。Pages も引き続き動きますが、新機能の追加は Workers 側に集中しています。このガイドは Workers で説明します。
+
+古い記事で Pages の手順を見かけたときは、読み替えれば内容はほぼ同じだと考えてください。
+:::
+
+## 使い分け
+
+GitHub をやめる必要はありません。役割を分けます。
+
+| | 置き場所 | 公開範囲 |
+|---|---|---|
+| 原稿・履歴 | GitHub リポジトリ | private でよい |
+| 公開してよいサイト | GitHub Pages | 全世界 |
+| 限定公開のサイト | Cloudflare Workers + Access | 許可した人だけ |
+
+原稿の管理は GitHub のままです。変更したら GitHub Actions が動き、**配信先だけが Cloudflare に変わる**と考えてください。第4部で作ったワークフローの最後の1ステップを差し替えるだけで済みます。
+
+1つのリポジトリで公開サイトと限定公開サイトを両方運用することもできますし、研究室マニュアルだけを限定公開にして、業績ページは GitHub Pages のまま、という分け方もできます。
+
+## 費用
+
+このガイドの範囲では、**Cloudflare 側の費用はかかりません。**
+
+- **Zero Trust（Access）** — 50ユーザーまで無料。研究室単位ならまず超えません
+- **Workers** — 無料枠は1日10万リクエスト。加えて、**静的ファイルへのリクエストは無料かつ無制限**です
+
+有料になるのは**ドメイン代**です（年1,500〜3,000円程度、@sec-custom-domain）。Cloudflare Access は、ドメイン名がないと設定できません。ここだけは避けられない出費です。
+
+無料枠の条件は変わることがあります。運用を始める前に、この章の参考リンクから現在の条件を確認してください。
+
+## ドメインを Cloudflare に預けるということ
+
+Cloudflare を使うには、ドメインのネームサーバを Cloudflare のものに変更します。以後、そのドメインの DNS 設定は Cloudflare の管理画面で行うことになります。
+
+変更に伴って、いくつか意識しておくことがあります。
+
+- **メールなど、他のレコードも一緒に移ります。** 独自ドメインでメールを受けている場合、MX レコードが正しく引き継がれたかを必ず確認してください。ここを見落とすとメールが止まります
+- **反映には時間がかかります。** 数分から48時間です
+- **レジストラは変えなくて構いません。** ドメインを買った業者はそのままで、ネームサーバの向き先だけを変えます
+
+大学のサブドメインを借りている場合、この変更は情報部門の管轄です。組織のドメイン全体に影響するため、通らないことも多いでしょう。**限定公開のサイトには、自分で取得したドメインを使うほうが現実的です。**
+
+## よくある誤解
+
+**「Cloudflare を通せば GitHub Pages も守られる」**
+
+守られません。`<ユーザー名>.github.io` の URL が生き続けるためです。限定公開にする中身は Cloudflare 側に置いてください。
+
+**「Cloudflare Pages と GitHub Pages は同じもの」**
+
+別会社の別サービスです。名前が似ているだけで、関係はありません。
+
+**「ドメインがなくても限定公開できる」**
+
+できません。Cloudflare Access はホスト名に対して設定するため、ドメインが必要です。`*.workers.dev` の URL には Access をかけられないと考えてください（次章で、この URL を無効にする設定を扱います）。
+
+**「Cloudflare に移すと GitHub が要らなくなる」**
+
+要ります。Cloudflare は配信を担うだけで、原稿の履歴管理はしません。GitHub は残したまま、公開先を増やす形になります。
+
+**「無料枠を超えたら、いきなり請求される」**
+
+Workers の無料プランでは、上限に達すると課金ではなくエラー応答になります。とはいえ、静的サイトの配信でこの上限に触れることはまずありません。
+
+## 参考リンク
+
+- [Cloudflare: Zero Trust の料金](https://www.cloudflare.com/ja-jp/plans/zero-trust-services/) — 無料枠のユーザー数と、有料プランとの違い（日本語）
+- [Cloudflare Docs: Workers の料金](https://developers.cloudflare.com/workers/platform/pricing/) — 無料枠のリクエスト数。静的ファイルの扱いもここに書かれている
+- [Cloudflare Docs: Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/) — ビルド済みサイトを配信する仕組みの入口
+- [Cloudflare Docs: Pages から Workers への移行](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/) — 古い記事の Pages 手順を読み替えるときの対応表
+- [Cloudflare Docs: サイトを追加する](https://developers.cloudflare.com/fundamentals/manage-domains/add-site/) — ネームサーバ変更の手順と、既存レコードの引き継ぎで注意すべき点
